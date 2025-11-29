@@ -2,12 +2,15 @@
   "manifest_version": 3,
   "name": "NT Ultra",
   "description": "The final boss of New Tab Pages",
-  "version": "0.1.6",
+  "version": "0.2.2",
   "icons": {
     "128": "static/logo128.png"
   },
   "chrome_url_overrides": {
     "newtab": "index.html"
+  },
+  "chrome_settings_overrides": {
+    "homepage": "index.html"
   },
   "permissions": [
     "tabs"

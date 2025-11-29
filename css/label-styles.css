@@ -9,4 +9,5 @@
     width: fit-content;
     margin-inline: auto;
     outline-offset: 20px;
+    border-radius: calc(var(--element-border-radius) - 10px) !important;
 }

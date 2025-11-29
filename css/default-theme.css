@@ -18,4 +18,26 @@
     --element-border-radius: 10px;
 }
 
-/* setting: enable more blur, needs to be redone as an attribute where it's variable(s) manipulate appearance. */
+body[theme-blur] {
+    .settings-sidebar {
+        background: color-mix(in srgb, var(--element-bg-color) 90%, transparent) !important;
+    }
+    .settings-content {
+        backdrop-filter: blur(10px) !important;
+    }
+    .tabs-sidebar {
+        background: color-mix(in srgb, var(--element-bg-color) 20%, transparent) !important;
+        backdrop-filter: blur(10px) !important;
+    }
+    .modal-content {
+        background: color-mix(in srgb, var(--element-bg-color) 40%, transparent) !important;
+        backdrop-filter: blur(10px) !important;
+    }
+    .shortcut-menu-btn {
+        background: color-mix(in srgb, var(--element-bg-color) 10%, transparent) !important;
+        backdrop-filter: blur(10px) !important;
+    }
+    .settings-sidebar *:not(select):not(option) {
+        --element-layered-bg-color: var(--more-blur) !important;
+    }
+}

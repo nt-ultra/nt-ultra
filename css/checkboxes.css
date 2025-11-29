@@ -1,0 +1,12 @@
+input {
+    appearance: none;
+    -moz-appearance: none;
+    border-radius:50%;
+    background: var(--element-layered-bg-color);
+    border: 1px solid color-mix(in srgb, var(--element-layered-bg-color) 95%, white);
+    cursor: pointer;
+    &:checked {
+        background: var(--accent-color);
+        border: none;       
+    }
+}

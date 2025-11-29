@@ -2,11 +2,11 @@
 @import url('css/fonts.css');
 @import url('css/default-theme.css');
 @import url('css/sliders.css');
-/* @import url('css/checkboxes.css'); */
-@import url('css/shortcuts-dragdrop.css');
+@import url('css/checkboxes.css');
+@import url('css/shortcut-dragdrop.css');
+@import url('css/shortcut-styles.css');
+@import url('css/label-styles.css');
+@import url('css/settings-sidebar.css');
+@import url('css/tabs-sidebar.css');
 @import url('css/modals.css');
 @import url('css/ui.css');
-@import url('css/tabs-sidebar.css');
-@import url('css/label-styles.css');
-
-#app { background: rgba(1,1,1,var(--dim-wallpaper)); }

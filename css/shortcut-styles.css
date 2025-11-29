@@ -1,0 +1,18 @@
+.shortcut[shortcut-scale-hover]:hover {
+    transform: scale(1.4);
+    transition: transform 0.2s ease;
+}
+
+.shortcut[shortcut-titles-hover] {
+    &:not(:hover) .shortcut-title {
+        opacity: 0;
+        transition: opacity 0.8s ease;
+    }
+}
+
+.shortcut[shortcut-menus-hidden] {
+    & .shortcut-menu-btn {
+        opacity: 0 !important;
+        /*visibility: hidden;*/
+    }
+}

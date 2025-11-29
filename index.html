@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Tab Ultra</title>
-    <link rel="icon" href="static/logo.png">
+    <link rel="icon" href="./static/logo128.png">
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
@@ -71,7 +71,6 @@
                 <!-- Display Section -->
                 <div class="settings-section">
                     <h3>Display</h3>
-                    
                     <label class="label">Font Family</label>
                     <select id="font-family" class="input">
                         <option value="system-ui">System</option>
@@ -83,26 +82,22 @@
                         <option value="serif">Serif</option>
                         <option value="'Times New Roman'">Times New Roman</option>
                     </select>
-
                     <label class="label">Label</label>
                     <select id="display-label" class="input">
                         <option value="on">On</option>
                         <option value="off">Off</option>
                     </select>
-
                     <label class="label">Shortcuts</label>
                     <select id="display-shortcuts" class="input">
                         <option value="on">On</option>
                         <option value="off">Off</option>
                     </select>
-
                     <label class="label">Tab Browser</label>
                     <select id="display-tab-browser" class="input">
                         <option value="disabled">Disabled</option>
                         <option value="button">Button</option>
                         <option value="autohide">Autohide</option>
                     </select>
-
                     <label class="label">Theme</label>
                     <select id="theme-mode" class="input">
                         <option value="default">Default</option>
@@ -132,7 +127,7 @@
                         <div class="checkbox-span">
                             <span>Enable more blur around the UI</span><input type="checkbox" id="theme-blur">
                         </div>
-                        <div class="checkbox-span">
+                        <!-- <div class="checkbox-span">
                             <span>This checkbox is purely cosmetic</span><input type="checkbox" id="na">
                         </div>
                         <div class="checkbox-span">
@@ -140,9 +135,8 @@
                         </div>
                         <div class="checkbox-span">
                             <span>This checkbox is purely cosmetic</span><input type="checkbox" id="na">
-                        </div>
+                        </div> -->
                     </div>
-                    
                     <div id="display-expanded-theme-settings" class="style-controls-state">
                         <button id="theme-controls-remove-btn" class="style-controls-remove-btn">Delete</button>
                         <button id="theme-controls-add-btn" class="style-controls-add-btn">Save</button>
@@ -156,13 +150,11 @@
                 <!-- Label Section -->
                 <div class="settings-section" id="label-section">
                     <h3>Label</h3>
-                    
                     <label class="label">Position</label>
                     <select id="label-position" class="input">
                         <option value="top">Top</option>
                         <option value="bottom">Bottom</option>
                     </select>
-                    
                     <label class="label">Content</label>
                     <select id="content-type" class="input">
                         <option value="none">New Tab Ultra</option>
@@ -172,14 +164,12 @@
                         <option value="timeOfDay">Time of Day</option>
                     </select>
                     <input type="text" id="user-name" class="input" placeholder="Your name" style="display: none;">
-
                     <label class="label">Style</label>
                     <select id="label-style" class="input">
                         <option value="none">None</option>
                         <option value="double-shadow">Extended Shadow</option>
                         <option value="basic-border">Basic Border</option>
                     </select>    
-
                     <label class="label">Scaling: <span id="label-font-size-value">48</span>px</label>
                     <input type="range" id="label-font-size" class="slider" min="24" max="96" value="48">
                 </div>
@@ -204,7 +194,9 @@
                     <div class="checkbox-span">
                         <span>Shortcut icon scale on hover</span><input type="checkbox" id="shortcut-scale-hover">
                     </div>
-
+                    <div class="checkbox-span">
+                        <span>Shortcut menu hidden (right click)</span><input type="checkbox" id="shortcut-menus-hidden">
+                    </div>
                     <div class="style-controls-state">
                         <button id="import-shortcuts-btn" class="import-shortcuts-btn">Import</button>
                         <button id="export-shortcuts-btn" class="export-shortcuts-btn">Export</button>
@@ -259,16 +251,12 @@
         <div id="edit-modal" class="modal" style="display: none;">
             <div class="modal-content">
                 <h3>Edit Shortcut</h3>
-                
                 <label class="label">Title</label>
                 <input type="text" id="edit-title" class="input">
-
                 <label class="label">URL</label>
                 <input type="text" id="edit-url" class="input">
-
                 <label class="label">Custom Icon URL (optional)</label>
                 <input type="text" id="edit-icon" class="input">
-
                 <div class="modal-actions">
                     <button id="save-edit" class="btn btn-primary">Save</button>
                     <button id="cancel-edit" class="btn btn-secondary">Cancel</button>
@@ -280,11 +268,9 @@
         <div id="add-theme-modal" class="modal" style="display: none;">
             <div class="modal-content">
                 <h3>Save Theme</h3>
-                
                 <label class="label">Save your settings and configuration as a new theme</label>
                 <input type="text" id="add-theme-name" class="input" placeholder="My Theme" maxlength="30">
                 <p class="input-hint">Max 30 characters. Letters, numbers, spaces, hyphens, and underscores only.</p>
-
                 <div class="modal-actions">
                     <button id="confirm-add-theme" class="btn btn-primary">Add Theme</button>
                     <button id="cancel-add-theme" class="btn btn-secondary">Cancel</button>
@@ -296,16 +282,12 @@
         <div id="export-theme-modal" class="modal" style="display: none;">
             <div class="modal-content">
                 <h3>Export Theme</h3>
-                
                 <label class="label">Theme Name</label>
                 <input type="text" id="export-theme-name" class="input" placeholder="Theme name">
-
                 <label class="label">Author (optional)</label>
                 <input type="text" id="export-theme-author" class="input" placeholder="Your name">
-
                 <label class="label">Description (optional)</label>
                 <textarea id="export-theme-description" class="input" placeholder="Describe your theme..." rows="3"></textarea>
-
                 <div class="modal-actions">
                     <button id="confirm-export-file" class="btn btn-primary">Download File</button>
                     <button id="confirm-export-copy" class="btn btn-primary">Copy JSON</button>
@@ -318,7 +300,6 @@
         <div id="import-theme-modal" class="modal" style="display: none;">
             <div class="modal-content">
                 <h3>Import Theme</h3>
-                
                 <label class="label">Choose Import Method</label>
                 <div class="import-options">
                     <button id="import-from-file-btn" class="btn btn-primary">
@@ -337,13 +318,11 @@
                         Clipboard
                     </button>
                 </div>
-
                 <div id="import-text-area" style="display: none; margin-top: 16px;">
                     <label class="label">Paste Theme JSON</label>
                     <textarea id="import-theme-json" class="input" placeholder='{"name": "Theme Name", ...}' rows="6"></textarea>
                     <button id="confirm-import-text" class="btn btn-primary" style="margin-top: 8px;">Import</button>
                 </div>
-
                 <button id="cancel-import-theme" class="btn btn-secondary" style="margin-top: 16px;">Cancel</button>
             </div>
         </div>
@@ -492,9 +471,12 @@
         <input type="file" id="import-shortcuts-file-input" accept=".txt,text/plain" style="display: none;">
     </div>
 
-    <script src="index.js"></script>
-    <script src="./js/sync.js"></script>
+    <script src="./js/utils/url-helpers.js"></script>
     <script src="./js/shortcuts-dragdrop.js"></script>
     <script src="./js/tabs-sidebar.js"></script>
+    <script src="./js/core/sync.js"></script>
+    <script src="index.js"></script>
+    <!-- eventually we'll export functions instead of using globals -->
+    
 </body>
 </html>

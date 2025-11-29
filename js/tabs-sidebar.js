@@ -127,7 +127,7 @@ function renderTabItem(tab, showAudioControls = false) {
     if (showAudioControls && tab.hasAudio) {
         const audioBtn = document.createElement('button');
         audioBtn.className = 'tabs-item-audio';
-        audioBtn.textContent = tab.mutedInfo.muted ? '🕪' : '🕨';
+        audioBtn.textContent = tab.mutedInfo.muted ? '🕨' : '🕪';
         audioBtn.title = tab.mutedInfo.muted ? 'Unmute' : 'Mute';
         audioBtn.draggable = false;
         audioBtn.addEventListener('mousedown', (e) => {

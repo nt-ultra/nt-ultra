@@ -10,6 +10,16 @@
 
 # Version History
 
+### <ins>NT Ultra 0.2.5-beta</ins>
+
+- Better handling of shortcut favicon loading
+- Padding adjustments for the settings sidebar
+- Better handling of shortcut styles via attributes
+- Label border style now adaptive to custom border radius
+- Better handling of imported shortcut value distribution
+- New shortcut toggle to hide context menu icons (still accessible via right clicking)
+- Other changes to naming conventions
+
 ### <ins>NT Ultra 0.2-beta</ins>
 
 - Reorganized Settings tree

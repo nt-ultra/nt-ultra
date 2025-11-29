@@ -1,5 +1,5 @@
 // default settings ////////////////////////////// 
-const DEFAULT_SETTINGS = {
+const default_settings = {
     fontFamily: 'system-ui',
     themeMode: 'default',
     displayLabel: true,
@@ -12,33 +12,35 @@ const DEFAULT_SETTINGS = {
     themeAnimationSpeed: 0.3,
     themeWallpaperDimness: 0,
     themeBlur: false,
-    shortcutTitlesHover: false,
-    shortcutScaleHover: false,
     displayExpandedSettings: false,
     labelPosition: 'top',
     labelFontSize: 48,
     labelContent: 'none',
     labelStyle: 'none',
+    shortcutMaxLimit: 24, // 84
     shortcutScaling: 100,
-    shortcutMaxLimit: 24,
     shortcutGridColumns: 8,
+    shortcutTitlesHover: false,
+    shortcutScaleHover: false,
+    shortcutMenusHidden: false,
     userName: ''
 };
-
-const THEME_VERSION = '1.0';
-const MAX_THEMES = 20;
 
 // default states ////////////////////////////////
 let state = {
     shortcuts: [],
     wallpapers: [],
     currentWallpaper: null,
-    settings: { ...DEFAULT_SETTINGS },
+    settings: { ...default_settings },
     activeTheme: 'default',
     themeList: ['default', 'custom'],
     editingShortcut: null,
     creatingShortcut: false
 };
+
+const themeVersion = '1.0';
+const themeMaxLimit = 20;
+
 let tempWallpaperData = null;
 let urlInputDebounceTimer = null;
 let db;
@@ -138,12 +140,11 @@ async function loadData() {
             if (themeSettings) await dbSet('settings', `theme_${state.activeTheme}`, themeSettings);
         }
         if (themeSettings) {
-            state.settings = { ...DEFAULT_SETTINGS, ...themeSettings };
+            state.settings = { ...default_settings, ...themeSettings };
         } else {
-            state.settings = { ...DEFAULT_SETTINGS };
+            state.settings = { ...default_settings };
             state.settings.themeMode = state.activeTheme;
         }
-        // Rest of the function stays the same...
         if (shortcuts) {
             state.shortcuts = shortcuts;
             if (window.initializeShortcutOrder) {
@@ -155,12 +156,12 @@ async function loadData() {
         if (currentWallpaper !== undefined) {
             state.currentWallpaper = currentWallpaper;
         } else {
-            state.currentWallpaper = '#1a1a2e';
+            state.currentWallpaper = '';
             saveCurrentWallpaper();
         }
     } catch (error) {
         console.log('No saved data found, starting fresh', error);
-        state.currentWallpaper = '#1a1a2e';
+        state.currentWallpaper = '';
         state.activeTheme = 'default';
         state.themeList = ['default', 'custom'];
         saveCurrentWallpaper();
@@ -179,7 +180,6 @@ async function saveShortcuts() {
         console.error('Error saving shortcuts:', error);
     }
 }
-
 async function saveWallpapers() {
     try {
         await dbSet('wallpapers', 'data', state.wallpapers);
@@ -187,7 +187,6 @@ async function saveWallpapers() {
         console.error('Error saving wallpapers:', error);
     }
 }
-
 async function saveSettings() {
     try {
         await dbSet('settings', `theme_${state.activeTheme}`, state.settings);
@@ -198,7 +197,6 @@ async function saveSettings() {
         console.error('Error saving settings:', error);
     }
 }
-
 async function saveCurrentWallpaper() {
     try {
         await dbSet('settings', 'currentWallpaper', state.currentWallpaper);
@@ -210,7 +208,6 @@ async function saveCurrentWallpaper() {
         console.error('Error saving current wallpaper:', error);
     }
 }
-
 async function saveThemeList() {
     try {
         await dbSet('settings', 'themeList', state.themeList);
@@ -222,42 +219,35 @@ async function saveThemeList() {
     }
 }
 
-// Theme management //////////////////////////////
+// Theme management //////////////////////////////  helpers
 function sanitizeThemeName(name) {
     return name.trim().replace(/[^a-zA-Z0-9\s\-_]/g, '');
 }
-
 function validateThemeName(name) {
     const sanitized = sanitizeThemeName(name);
     if (!sanitized) return { valid: false, error: 'Theme name cannot be empty' };
     if (sanitized.length > 30) return { valid: false, error: 'Theme name too long (max 30 characters)' };
-    
     const lowerName = sanitized.toLowerCase();
     if (lowerName === 'default' || lowerName === 'custom') {
         return { valid: false, error: 'Cannot use reserved names: default, custom' };
     }
-    
     return { valid: true, name: sanitized };
 }
-
 function getUniqueThemeName(baseName) {
     let name = baseName;
     let counter = 2;
-    
     while (state.themeList.includes(name)) {
         name = `${baseName} (${counter})`;
         counter++;
     }
-    
     return name;
 }
 
 async function addTheme() {
-    if (state.themeList.length >= MAX_THEMES) {
-        alert(`Maximum ${MAX_THEMES} themes allowed`);
+    if (state.themeList.length >= themeMaxLimit) {
+        alert(`Maximum ${themeMaxLimit} themes allowed`);
         return;
     }
-    
     // Show modal
     document.getElementById('add-theme-modal').style.display = 'flex';
     document.getElementById('add-theme-name').value = '';
@@ -267,14 +257,11 @@ async function addTheme() {
 async function confirmAddTheme() {
     const input = document.getElementById('add-theme-name').value;
     const validation = validateThemeName(input);
-    
     if (!validation.valid) {
         alert(validation.error);
         return;
     }
-    
     let themeName = validation.name;
-    
     // duplicates, save, add, switch
     if (state.themeList.includes(themeName)) {
         themeName = getUniqueThemeName(themeName);
@@ -286,10 +273,8 @@ async function confirmAddTheme() {
     state.activeTheme = themeName;
     state.settings = newThemeSettings;
     await dbSet('settings', 'activeTheme', themeName);
-    
     document.getElementById('add-theme-modal').style.display = 'none';
     render();
-    
     console.log(`Theme '${themeName}' added successfully`);
 }
 
@@ -316,7 +301,7 @@ async function removeTheme() {
 function generateThemeJSON(themeName, author, description) {
     return {
         name: themeName || state.activeTheme,
-        version: THEME_VERSION,
+        version: themeVersion,
         author: author || '',
         description: description || '',
         settings: { ...state.settings }
@@ -353,7 +338,6 @@ async function confirmExportCopy() {
     const description = document.getElementById('export-theme-description').value.trim();
     const themeData = generateThemeJSON(name, author, description);
     const jsonString = JSON.stringify(themeData, null, 2);
-    
     try {
         await navigator.clipboard.writeText(jsonString);
         alert('Theme JSON copied to clipboard!');
@@ -368,7 +352,6 @@ async function confirmExportCopy() {
         document.body.removeChild(textarea);
         alert('Theme JSON copied to clipboard!');
     }
-    
     document.getElementById('export-theme-modal').style.display = 'none';
     console.log('Theme JSON copied');
 }
@@ -391,25 +374,20 @@ async function importFromText() {
 async function processThemeImport(jsonString) {
     try {
         const themeData = JSON.parse(jsonString);
-        
         if (!themeData.name || !themeData.settings) {
             alert('Invalid theme file: missing name or settings');
             return;
         }
-        
         const validation = validateThemeName(themeData.name);
         let themeName = validation.valid ? validation.name : 'Imported Theme';
-        
         if (state.themeList.includes(themeName)) {
             themeName = getUniqueThemeName(themeName);
         }
-        
-        if (state.themeList.length >= MAX_THEMES) {
-            alert(`Maximum ${MAX_THEMES} themes allowed`);
+        if (state.themeList.length >= themeMaxLimit) {
+            alert(`Maximum ${themeMaxLimit} themes allowed`);
             return;
         }
-        
-        const newThemeSettings = { ...DEFAULT_SETTINGS, ...themeData.settings, themeMode: themeName };
+        const newThemeSettings = { ...default_settings, ...themeData.settings, themeMode: themeName };
         await dbSet('settings', `theme_${themeName}`, newThemeSettings);
         state.themeList.push(themeName);
         await saveThemeList();
@@ -418,11 +396,9 @@ async function processThemeImport(jsonString) {
         await dbSet('settings', 'activeTheme', themeName);
         document.getElementById('import-theme-modal').style.display = 'none';
         render();
-        
         const authorInfo = themeData.author ? ` by ${themeData.author}` : '';
         alert(`Theme '${themeName}'${authorInfo} imported successfully!`);
         console.log(`Theme imported: ${themeName}`, themeData);
-        
     } catch (error) {
         console.error('Import error:', error);
         alert('Failed to import theme. Please check the JSON format.');
@@ -432,7 +408,6 @@ async function processThemeImport(jsonString) {
 async function resetEverything() {
     // Show modal instead of confirm dialog
     document.getElementById('reset-modal').style.display = 'flex';
-    
     // Reset checkboxes to defaults
     document.getElementById('reset-themes').checked = true;
     document.getElementById('reset-wallpapers').checked = false;
@@ -454,17 +429,17 @@ async function confirmReset() {
                     await dbDelete('settings', `theme_${theme}`);
                 }
             }
-            await dbSet('settings', 'theme_custom', { ...DEFAULT_SETTINGS, themeMode: 'custom' });
+            await dbSet('settings', 'theme_custom', { ...default_settings, themeMode: 'custom' });
             state.themeList = ['default', 'custom'];
             await saveThemeList();
             state.activeTheme = 'default';
-            state.settings = { ...DEFAULT_SETTINGS };
+            state.settings = { ...default_settings };
             await dbSet('settings', 'activeTheme', 'default');
         }
         if (resetWallpapers) {
             state.wallpapers = [];
             await saveWallpapers();
-            state.currentWallpaper = '#1a1a2e';
+            state.currentWallpaper = '';
             await saveCurrentWallpaper();
         }
         if (resetShortcuts) {
@@ -481,60 +456,35 @@ async function confirmReset() {
     }
 }
 
-// shortcut helpers //////////////////////////////
-function getCleanHostname(url) {
-    try {
-        let hostname = new URL(url).hostname;
-        if (hostname.startsWith('www.')) {
-            hostname = hostname.replace('www.', '');
-        }
-        const lastDotIndex = hostname.lastIndexOf('.');
-        if (lastDotIndex !== -1) {
-            hostname = hostname.substring(0, lastDotIndex);
-        }
-        return hostname;
-    } catch (error) {
-        console.error('Invalid URL:', error);
-        return '';
-    }
-}
-function getFaviconUrl(url) {
-    try {
-        const hostname = new URL(url).hostname;
-        if (!hostname.includes('.')) {
-            // no fallback white globes here...
-            return null;
-        }
-        return `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`;
-    } catch (error) {
-        console.error('Invalid URL for favicon:', error);
-        return null;
-    }
-}
-function normalizeUrl(url) {
-    url = url.trim();
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
-    }
-    try {
-        new URL(url);
-        return url;
-    } catch (error) {
-        return null;
-    }
-}
 // Shortcut Import/Export ////////////////////////
 function parseShortcutsText(text) {
     const lines = text.split('\n').filter(line => line.trim());
     const shortcuts = [];
     for (const line of lines) {
         if (state.shortcuts.length + shortcuts.length >= state.settings.shortcutMaxLimit) break;
-        const parts = line.trim().split(/\s+/);
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        const parts = trimmed.split(/\s+/);
         if (parts.length === 0) continue;
         const url = normalizeUrl(parts[0]);
         if (!url) continue;
-        const title = parts[1] || getCleanHostname(url) || 'Untitled';
-        const customIcon = parts[2] || null;
+        let title, customIcon;
+        if (parts.length === 1) {
+            title = getCleanHostname(url) || 'Untitled';
+            customIcon = null;
+        } else if (parts.length === 2) {
+            title = parts[1];
+            customIcon = null;
+        } else {
+            const lastPart = parts[parts.length - 1];
+            if (lastPart.startsWith('http://') || lastPart.startsWith('https://')) {
+                customIcon = lastPart;
+                title = parts.slice(1, -1).join(' ');
+            } else {
+                title = parts.slice(1).join(' ');
+                customIcon = null;
+            }
+        }
         const icon = customIcon || getFaviconUrl(url);
         const exists = state.shortcuts.some(s => s.url === url);
         if (!exists) {
@@ -575,9 +525,9 @@ async function importFromFirefox(pinnedSites) {
         if (!exists) {
             shortcuts.push({
                 id: Date.now() + shortcuts.length,
-                title: site.label || getCleanHostname(site.url),
+                title: site.label || window.getCleanHostname(site.url),
                 url: site.url,
-                icon: site.customScreenshotURL || getFaviconUrl(site.url),
+                icon: site.customScreenshotURL || window.getFaviconUrl(site.url),
                 pinned: false,
                 order: state.shortcuts.length + shortcuts.length
             });
@@ -710,13 +660,23 @@ function renderShortcuts() {
         if (shortcut.icon) {
             const img = document.createElement('img');
             img.src = shortcut.icon;
-            img.alt = shortcut.title;
+            img.alt = "  ";
             img.onerror = function() {
-                this.style.display = 'none';
-                const placeholder = document.createElement('div');
-                placeholder.className = 'shortcut-icon-placeholder';
-                placeholder.textContent = shortcut.title[0].toUpperCase();
-                icon.appendChild(placeholder);
+            //     this.style.display = 'none';
+            //     const placeholder = document.createElement('div');
+            //     placeholder.className = 'shortcut-icon-placeholder';
+            //     placeholder.textContent = shortcut.title[0].toUpperCase();
+            //     icon.appendChild(placeholder);
+            // };
+                setTimeout(() => {
+                    if (!this.complete || this.naturalWidth === 0) {
+                        this.style.display = 'none';
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'shortcut-icon-placeholder';
+                        placeholder.textContent = shortcut.title[0].toUpperCase();
+                        icon.appendChild(placeholder);
+                    }
+                }, 100);
             };
             icon.appendChild(img);
         } else {
@@ -777,23 +737,25 @@ function renderShortcuts() {
         console.log('Drag Drop initialized');
         setTimeout(() => window.initShortcutDragDrop(), 0);
     }
+    document.querySelectorAll('.shortcut').forEach(shortcut => {
+        shortcut.toggleAttribute('shortcut-scale-hover', state.settings.shortcutScaleHover);
+        shortcut.toggleAttribute('shortcut-titles-hover', state.settings.shortcutTitlesHover);
+        shortcut.toggleAttribute('shortcut-menus-hidden', state.settings.shortcutMenusHidden);
+    });
 }
 
 function renderWallpapers() {
     const grid = document.getElementById('wallpapers-grid');
     const count = document.getElementById('wallpaper-count');
     const removeBtn = document.getElementById('remove-wallpaper-btn');
-
     count.textContent = state.wallpapers.length;
     grid.innerHTML = '';
-
     state.wallpapers.forEach(wp => {
         const div = document.createElement('div');
         div.className = 'wallpaper-item';
         if (state.currentWallpaper === wp.url) {
             div.classList.add('active');
         }
-
         if (wp.url.startsWith('#')) {
             div.style.backgroundColor = wp.url;
             div.style.height = '80px';
@@ -803,7 +765,6 @@ function renderWallpapers() {
             img.alt = 'Wallpaper';
             div.appendChild(img);
         }
-
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'wallpaper-delete';
         deleteBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -814,19 +775,16 @@ function renderWallpapers() {
             e.stopPropagation();
             deleteWallpaper(wp.id);
         });
-
         div.addEventListener('click', () => selectWallpaper(wp.url));
         div.appendChild(deleteBtn);
         grid.appendChild(div);
     });
-
     removeBtn.style.display = state.currentWallpaper ? 'flex' : 'none';
 }
 
 function renderThemeDropdown() {
     const dropdown = document.getElementById('theme-mode');
     dropdown.innerHTML = '';
-    
     state.themeList.forEach(theme => {
         const option = document.createElement('option');
         option.value = theme;
@@ -871,6 +829,7 @@ function renderSettings() {
     document.getElementById('shortcut-max-limit-value').textContent = state.settings.shortcutMaxLimit;
     document.getElementById('shortcut-titles-hover').checked = state.settings.shortcutTitlesHover;
     document.getElementById('shortcut-scale-hover').checked = state.settings.shortcutScaleHover;
+    document.getElementById('shortcut-menus-hidden').checked = state.settings.shortcutMenusHidden;
 
     // Show/hide sections
     document.getElementById('label-section').style.display = state.settings.displayLabel ? 'block' : 'none';
@@ -914,36 +873,7 @@ function applyStyles() {
     if (tabsSidebar) tabsSidebar.style.transitionDuration = `${animSpeed}s`;
     const settingsSidebar = document.getElementById('settings-sidebar');
     if (settingsSidebar) settingsSidebar.style.transitionDuration = `${animSpeed}s`;
-    if (state.settings.themeBlur) {
-        let blurStyleTag = document.getElementById('blur-styles');
-        if (!blurStyleTag) {
-            blurStyleTag = document.createElement('style');
-            blurStyleTag.id = 'blur-styles';
-            document.head.appendChild(blurStyleTag);
-        }
-        blurStyleTag.textContent = `
-            .settings-sidebar {background: color-mix(in srgb, var(--element-bg-color) 90%, transparent) !important;}
-            .settings-content {backdrop-filter: blur(10px) !important;}
-            .tabs-sidebar {
-                background: color-mix(in srgb, var(--element-bg-color) 20%, transparent) !important;
-                backdrop-filter: blur(10px) !important;
-            }
-            .modal-content {
-                background: color-mix(in srgb, var(--element-bg-color) 40%, transparent) !important;
-                backdrop-filter: blur(10px) !important;
-            }
-            .shortcut-menu-btn {
-                background: color-mix(in srgb, var(--element-bg-color) 10%, transparent) !important;
-                backdrop-filter: blur(10px) !important;
-            }
-            .settings-sidebar *:not(select):not(option) {--element-layered-bg-color: var(--more-blur) !important;}
-        `;
-    } else {
-        const blurStyleTag = document.getElementById('blur-styles');
-        if (blurStyleTag) {
-            blurStyleTag.remove();
-        }
-    }
+    body.toggleAttribute('theme-blur', state.settings.themeBlur);
     if (tabsSidebar && tabsBtn) {
         window.tabsSidebarMode = state.settings.displayTabBrowser;
         switch (state.settings.displayTabBrowser) {
@@ -961,30 +891,7 @@ function applyStyles() {
                 break;
         }
     }
-    let hoverStyleTag = document.getElementById('shortcut-hover-styles');
-    if (!hoverStyleTag) {
-        hoverStyleTag = document.createElement('style');
-        hoverStyleTag.id = 'shortcut-hover-styles';
-        document.head.appendChild(hoverStyleTag);
-    }
-    let hoverStyles = '';
-    if (state.settings.shortcutTitlesHover) {
-        hoverStyles += `
-            .shortcut:not(:hover) .shortcut-title {
-                opacity: 0;
-                transition: opacity 0.8s ease;
-            }
-        `;
-    }
-    if (state.settings.shortcutScaleHover) {
-        hoverStyles += `
-            .shortcut:hover {
-                transform: scale(1.4);
-                transition: transform 0.2s ease;
-            }
-        `;
-    }
-    hoverStyleTag.textContent = hoverStyles;
+
     if (headerText) {
         headerText.style.fontSize = `${state.settings.labelFontSize}px`;
     }
@@ -1076,7 +983,7 @@ function saveEdit() {
     const title = document.getElementById('edit-title').value.trim();
     const urlInput = document.getElementById('edit-url').value.trim();
     const customIcon = document.getElementById('edit-icon').value.trim();
-    const url = normalizeUrl(urlInput);
+    const url = window.normalizeUrl(urlInput);
     if (!url) {
         alert('Please enter a valid URL');
         return;
@@ -1085,7 +992,7 @@ function saveEdit() {
         alert('Please enter a title');
         return;
     }
-    const icon = customIcon || getFaviconUrl(url);
+    const icon = customIcon || window.getFaviconUrl(url);
     if (state.creatingShortcut) {
         const newShortcut = {
             id: state.editingShortcut.id,
@@ -1120,15 +1027,11 @@ function handleUrlInput(e) {
     if (urlInputDebounceTimer) clearTimeout(urlInputDebounceTimer);
     urlInputDebounceTimer = setTimeout(() => {
         if (!urlInput) return;
-
-        const normalizedUrl = normalizeUrl(urlInput);
+        const normalizedUrl = window.normalizeUrl(urlInput);
         if (!normalizedUrl) return;
-
-        const suggestedTitle = getCleanHostname(normalizedUrl);
+        const suggestedTitle = window.getCleanHostname(normalizedUrl);
         if (!suggestedTitle) return;
-
         const currentTitle = titleInput.value.trim();
-
         if (state.creatingShortcut) {
             if (!currentTitle) {
                 titleInput.value = suggestedTitle;
@@ -1136,12 +1039,10 @@ function handleUrlInput(e) {
             return;
         }
         if (state.editingShortcut) {
-            const originalSuggestedTitle = getCleanHostname(normalizeUrl(state.editingShortcut.url) || '');
-
+            const originalSuggestedTitle = window.getCleanHostname(window.normalizeUrl(state.editingShortcut.url) || '');
             const titleWasAutoGenerated = !currentTitle ||
                 currentTitle.toLowerCase() === originalSuggestedTitle.toLowerCase() ||
                 currentTitle.toLowerCase() === state.editingShortcut.title.toLowerCase();
-
             if (titleWasAutoGenerated) {
                 titleInput.value = suggestedTitle;
             }
@@ -1181,7 +1082,6 @@ function confirmWallpaper() {
         saveWallpapers();
         state.currentWallpaper = tempWallpaperData;
         saveCurrentWallpaper();
-        // this whole process of adding takes menu clicks.. so at least auto select it as well, maybe skip preview menu for file selection
         renderWallpapers();
         applyStyles();
         closeWallpaperModal();
@@ -1236,7 +1136,6 @@ async function updateSetting(key, value) {
         state.settings.themeMode = 'custom';
         await dbSet('settings', 'activeTheme', 'custom');
     }
-    
     state.settings[key] = value;
     await saveSettings();
     render();
@@ -1259,18 +1158,14 @@ async function switchTheme(mode) {
     if (state.activeTheme === 'custom') {
         await dbSet('settings', `theme_${state.activeTheme}`, state.settings);
     }
-    
     state.activeTheme = mode;
     await dbSet('settings', 'activeTheme', mode);
-    
     const themeSettings = await dbGet('settings', `theme_${mode}`);
-    
     if (themeSettings) {
-        state.settings = { ...DEFAULT_SETTINGS, ...themeSettings };
+        state.settings = { ...default_settings, ...themeSettings };
     } else {
-        state.settings = { ...DEFAULT_SETTINGS };
+        state.settings = { ...default_settings };
     }
-    
     state.settings.themeMode = mode;
     render();
 }
@@ -1388,6 +1283,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     document.getElementById('shortcut-scale-hover').addEventListener('change', (e) => {
         updateSetting('shortcutScaleHover', e.target.checked);
+    });
+    document.getElementById('shortcut-menus-hidden').addEventListener('change', (e) => {
+        updateSetting('shortcutMenusHidden', e.target.checked);
     });
 
 
@@ -1676,16 +1574,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     function createShortcutFromData(title, url, iconUrl) {
-        const cleanUrl = normalizeUrl(url);
+        const cleanUrl = window.normalizeUrl(url);
         if (!cleanUrl) {
             console.error('Invalid URL dropped');
             return;
         }
         const newShortcut = {
             id: Date.now(),
-            title: title || getCleanHostname(cleanUrl) || 'Untitled',
+            title: title || window.getCleanHostname(cleanUrl) || 'Untitled',
             url: cleanUrl,
-            icon: iconUrl || getFaviconUrl(cleanUrl),
+            icon: iconUrl || window.getFaviconUrl(cleanUrl),
             pinned: false,
             order: state.shortcuts.length
         };
@@ -1859,10 +1757,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const isInitted = sessionStorage.getItem('isInitted') === 'true';
     if (!isInitted) {
-        setTimeout(() => { // after 2 seconds we can consider the page init. this will be used for animate-launch, and in the future can be used for extension first run tutorial
+        setTimeout(() => {
             document.body.toggleAttribute('initted', true);
             console.log('Initted?', document.body.hasAttribute('initted'));
-        }, 2100);
+        }, 2100); // after 2 seconds we can consider the page init,  used with animate-launch.css
     }
 
 });
