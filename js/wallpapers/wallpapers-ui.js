@@ -35,7 +35,7 @@ export function initWallpapersUI() {
         if (file) {
             const fileSizeMB = file.size / (1024 * 1024);
             if (fileSizeMB > 200) {
-                alert(`This image's file size is ${fileSizeMB.toFixed(1)}MB, under 200MB is the limit.`);
+                notify('Wallpaper size is excessive', `This image's file size is ${fileSizeMB.toFixed(1)}MB, under 200MB is the limit.`);
                 e.target.value = '';
                 return;
             }

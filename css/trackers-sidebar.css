@@ -19,7 +19,7 @@
 
 .trackers-sidebar {
     position: fixed;
-    bottom: -500px;
+    bottom: -90vh;
     left: 0; right: 0;
     margin: 0 5px;
     max-width: calc(100vw - 10px);
@@ -218,7 +218,7 @@
 .trackers-footer-btn {
     width: 32px; height: 32px;
     background: transparent;
-    border: none; border-radius: 8px;
+    border: none; border-radius: 50%;
     color: var(--element-fg-color);
     cursor: pointer;
     display: flex;

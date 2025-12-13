@@ -1,335 +1,495 @@
-import { addTracker, renderTrackers } from './trackers.js';
+import { state } from '../core/state.js';
+import { notify } from '../core/notify.js';
 import { ModalManager } from '../core/modal-manager.js';
+import { addTracker, updateTracker, renderTrackers } from './trackers.js';
+import { saveTrackers } from '../core/database.js';
+import { validateAndFetchInitialData, getFlattenedKeys, getNestedValue } from './trackers-fetcher.js';
+
+let tempTrackerData = null;
+let sourceDebounceTimer = null;
 
 export function initTrackersUI() {
-    const trackersBtn = document.getElementById('trackers-btn');
-    const trackersSidebar = document.getElementById('trackers-sidebar');
-    const closeTrackers = document.getElementById('close-trackers');
-    const addTrackerBtn = document.getElementById('add-tracker-btn');
-    if (trackersBtn) {
-        trackersBtn.addEventListener('click', () => {
-            trackersSidebar?.classList.toggle('open');
-        });
-    }
-    if (closeTrackers) {
-        closeTrackers.addEventListener('click', () => {
-            trackersSidebar?.classList.remove('open');
-        });
-    }
-    if (trackersSidebar) {
-        trackersSidebar.addEventListener('click', (e) => {
-            if (e.target.id === 'trackers-sidebar') {
-                trackersSidebar.classList.remove('open');
-            }
-        });
-    }
-    if (addTrackerBtn) {
-        addTrackerBtn.addEventListener('click', () => {
-            openAddTrackerModal();
-        });
-    }
-    setupModalHandlers();
-    console.log('trackers-ui: modules loaded...');
-}
-
-function openAddTrackerModal() {
-    const urlInput = document.getElementById('tracker-url');
-    const titleInput = document.getElementById('tracker-title');
-    const typeDisplay = document.getElementById('tracker-type-display');
-    if (urlInput) urlInput.value = '';
-    if (titleInput) titleInput.value = '';
-    if (typeDisplay) typeDisplay.textContent = 'Enter a URL to auto-detect';
-    ModalManager.show('add-tracker-modal');
-    setTimeout(() => {
-        if (urlInput) urlInput.focus();
-    }, 100);
-}
-
-function setupModalHandlers() {
-    const saveBtn = document.getElementById('save-tracker');
-    const cancelBtn = document.getElementById('cancel-tracker');
-    const urlInput = document.getElementById('tracker-url');
-    if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
-            handleAddTracker();
-        });
-    }
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-            ModalManager.hide('add-tracker-modal');
-        });
-    }
-    ModalManager.onClickOutside('add-tracker-modal', () => {
-        ModalManager.hide('add-tracker-modal');
+  const trackersBtn = document.getElementById('trackers-btn');
+  const trackersSidebar = document.getElementById('trackers-sidebar');
+  const closeTrackers = document.getElementById('close-trackers');
+  const addTrackerBtn = document.getElementById('add-tracker-btn');
+  if (trackersBtn) {
+    trackersBtn.addEventListener('click', () => {
+      trackersSidebar?.classList.toggle('open');
     });
-    let debounceTimer;
-    if (urlInput) {
-        urlInput.addEventListener('input', (e) => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                updateTypeDisplay(e.target.value);
-            }, 300);
-        });
-    }
+  }
+  if (closeTrackers) {
+    closeTrackers.addEventListener('click', () => {
+      trackersSidebar?.classList.remove('open');
+    });
+  }
+  if (trackersSidebar) {
+    trackersSidebar.addEventListener('click', (e) => {
+      if (e.target.id === 'trackers-sidebar') {
+        trackersSidebar.classList.remove('open');
+      }
+    });
+  }
+  if (addTrackerBtn) {
+    addTrackerBtn.addEventListener('click', () => {
+      openTrackerModalForAdd();
+    });
+  }
+  initTrackerModal();  
+  window.openTrackerModalForEdit = openTrackerModalForEdit;
+  console.log('...trackers-ui: initialized...');
 }
 
-async function updateTypeDisplay(url) {
-    const typeDisplay = document.getElementById('tracker-type-display');
-    if (!typeDisplay) return;
-    if (!url || url.trim() === '') {
-        typeDisplay.textContent = 'Enter a URL to auto-detect';
-        return;
+// UNIFIED TRACKER MODAL //////////////////////////////////////////////////////////////////////////
+
+function initTrackerModal() {
+  const modal = document.getElementById('tracker-modal');
+  if (!modal) return;
+  const sourceInput = document.getElementById('tracker-source');
+  const typeSelect = document.getElementById('tracker-type');
+  if (sourceInput) {
+    sourceInput.addEventListener('input', (e) => {
+      clearTimeout(sourceDebounceTimer);
+      sourceDebounceTimer = setTimeout(async () => {
+        await handleSourceChange(e.target.value.trim());
+      }, 700);
+    });
+  }
+  if (typeSelect) {
+    typeSelect.addEventListener('change', () => {
+      const selectedType = typeSelect.value;
+      if (selectedType === 'json') {
+        const sourceInput = document.getElementById('tracker-source');
+        if (sourceInput) sourceInput.placeholder = 'Enter JSON URL...';
+      }
+      updateModalFieldVisibility();
+    });
+  }
+  
+  modal.addEventListener('click', async (e) => {
+    const targetId = e.target.id;
+    if (targetId === 'save-edit-tracker') {
+      e.stopPropagation();
+      await handleSaveTracker();
+    } else if (targetId === 'cancel-edit-tracker') {
+      e.stopPropagation();
+      closeTrackerModal();
+    } else if (targetId === 'tracker-modal') {
+      closeTrackerModal();
     }
+  });
+}
+
+// OPEN MODAL FOR ADD /////////////////////////////////////////////////////////////////////////////
+
+function openTrackerModalForAdd() {
+  const modal = document.getElementById('tracker-modal');
+  const modeTitle = document.getElementById('tracker-modal-mode');
+  tempTrackerData = {
+    type: 'rss',
+    source: '',
+    apiEndpoint: '',
+    title: '',
+    faviconUrl: '',
+    redirectUrl: '',
+    config: {},
+    latestItem: null
+  };
+  
+  modal.setAttribute('display-mode', 'add');
+  if (modeTitle) modeTitle.textContent = 'Add Tracker';
+  const sourceInput = document.getElementById('tracker-source');
+  const typeSelect = document.getElementById('tracker-type');
+  const titleInput = document.getElementById('tracker-title');
+  const titleSelect = document.getElementById('tracker-selected-title');
+  const feedSelect = document.getElementById('tracker-selected-feed');
+  const faviconInput = document.getElementById('edit-tracker-favicon');
+  const redirectInput = document.getElementById('tracker-url');
+  const intervalInput = document.getElementById('edit-tracker-interval');
+  const limitInput = document.getElementById('edit-tracker-limit');
+  const idInput = document.getElementById('edit-tracker-id');
+  
+  if (sourceInput) {
+    sourceInput.value = '';
+    sourceInput.placeholder = 'Enter URL...';
+  }
+  if (typeSelect) typeSelect.value = 'rss';
+  if (titleInput) titleInput.value = '';
+  if (titleSelect) titleSelect.innerHTML = '<option value="">Select title key...</option>';
+  if (feedSelect) feedSelect.innerHTML = '<option value="">Select feed key...</option>';
+  if (faviconInput) faviconInput.value = '';
+  if (redirectInput) redirectInput.value = '';
+  if (intervalInput) intervalInput.value = '5';
+  if (limitInput) limitInput.value = '200';
+  if (idInput) idInput.value = '';
+  
+  updateModalFieldVisibility();
+  ModalManager.show('tracker-modal');
+  setTimeout(() => {
+    sourceInput?.focus();
+  }, 100);
+}
+
+// OPEN MODAL FOR EDIT ////////////////////////////////////////////////////////////////////////////
+
+function openTrackerModalForEdit(tracker) {
+  const modal = document.getElementById('tracker-modal');
+  const modeTitle = document.getElementById('tracker-modal-mode');
+  tempTrackerData = structuredClone(tracker);
+  
+  modal.setAttribute('display-mode', 'edit');
+  if (modeTitle) modeTitle.textContent = 'Edit Tracker';
+
+  const sourceInput = document.getElementById('tracker-source');
+  const typeSelect = document.getElementById('tracker-type');
+  const titleInput = document.getElementById('tracker-title');
+  const titleSelect = document.getElementById('tracker-selected-title');
+  const feedSelect = document.getElementById('tracker-selected-feed');
+  const faviconInput = document.getElementById('edit-tracker-favicon');
+  const redirectInput = document.getElementById('tracker-url');
+  const intervalInput = document.getElementById('edit-tracker-interval');
+  const limitInput = document.getElementById('edit-tracker-limit');
+  const idInput = document.getElementById('edit-tracker-id');
+  
+  if (sourceInput) sourceInput.value = tracker.source || '';
+  if (typeSelect) typeSelect.value = tracker.type || 'rss';
+  if (titleInput) titleInput.value = tracker.title || '';
+  if (faviconInput) faviconInput.value = tracker.faviconUrl || '';
+  if (redirectInput) redirectInput.value = tracker.redirectUrl || '';
+  if (intervalInput) intervalInput.value = (tracker.updateInterval || 300000) / 60000;
+  if (limitInput) limitInput.value = tracker.dailyRequestLimit || 200;
+  if (idInput) idInput.value = tracker.id || '';
+  
+  if (tracker.type === 'json' && tracker.config.titleKey && tracker.config.feedKey) {
+    if (titleSelect) {
+      titleSelect.innerHTML = `<option value="${tracker.config.titleKey}">${tracker.config.titleKey}</option>`;
+      titleSelect.value = tracker.config.titleKey;
+    }
+    if (feedSelect) {
+      feedSelect.innerHTML = `<option value="${tracker.config.feedKey}">${tracker.config.feedKey}</option>`;
+      feedSelect.value = tracker.config.feedKey;
+    }
+  }
+  
+  updateModalFieldVisibility();
+  ModalManager.show('tracker-modal');
+}
+
+// CLOSE MODAL ////////////////////////////////////////////////////////////////////////////////////
+
+function closeTrackerModal() {
+  tempTrackerData = null;
+  const sourceInput = document.getElementById('tracker-source');
+  const titleInput = document.getElementById('tracker-title');
+  const faviconInput = document.getElementById('edit-tracker-favicon');
+  const redirectInput = document.getElementById('tracker-url');
+  const titleSelect = document.getElementById('tracker-selected-title');
+  const feedSelect = document.getElementById('tracker-selected-feed');
+  if (sourceInput) {
+    sourceInput.value = '';
+    sourceInput.placeholder = 'Enter URL...';
+  }
+  if (titleInput) titleInput.value = '';
+  if (faviconInput) faviconInput.value = '';
+  if (redirectInput) redirectInput.value = '';
+  if (titleSelect) titleSelect.innerHTML = '<option value="">Select title key...</option>';
+  if (feedSelect) feedSelect.innerHTML = '<option value="">Select feed key...</option>';
+  ModalManager.hide('tracker-modal');
+}
+
+
+
+
+
+// HANDLE SOURCE CHANGE ///////////////////////////////////////////////////////////////////////////
+
+async function handleSourceChange(source) {
+  if (!source) return;
+  
+  const sourceInput = document.getElementById('tracker-source');
+  const typeSelect = document.getElementById('tracker-type');
+  const titleInput = document.getElementById('tracker-title');
+  const faviconInput = document.getElementById('edit-tracker-favicon');
+  const redirectInput = document.getElementById('tracker-url');
+  
+  try {
+    if (sourceInput) sourceInput.placeholder = 'Detecting...';
+    
+    const detected = await validateAndFetchInitialData(source);
+    
+    console.log('temp data extracted from source:', detected);
+    
+    if (detected.needsConfiguration) {
+      // JSON with URL
+      if (typeSelect) typeSelect.value = 'json';
+      tempTrackerData.type = 'json';
+      tempTrackerData.source = source;
+      tempTrackerData.apiEndpoint = source;
+      updateModalFieldVisibility();
+      await fetchAndPopulateJsonKeys(source);
+      return;
+    }
+    // Update temp data
+    tempTrackerData.type = detected.type;
+    tempTrackerData.source = detected.source;
+    tempTrackerData.apiEndpoint = detected.apiEndpoint;
+    tempTrackerData.redirectUrl = detected.redirectUrl;
+    tempTrackerData.faviconUrl = detected.faviconUrl;
+    tempTrackerData.feedContent = detected.feedContent;
+    tempTrackerData.title = detected.feedTitle;
+    
+    console.log('updated temp data:', tempTrackerData);
+    
+    if (typeSelect) {
+      typeSelect.value = detected.type;
+    }
+    if (titleInput) {
+      titleInput.value = detected.feedTitle || '';
+    }
+    if (faviconInput) {
+      faviconInput.value = detected.faviconUrl || '';
+    }
+    if (redirectInput) {
+      redirectInput.value = detected.redirectUrl || '';
+    }
+    if (sourceInput) sourceInput.placeholder = 'Enter URL...';
+    
+    updateModalFieldVisibility();
+    
+  } catch (error) {
+    if (sourceInput) sourceInput.placeholder = 'Invalid URL or unsupported type';
+    notify('Source could not be identified?', error.message);
+  }
+}
+
+// UPDATE MODAL FIELD VISIBILITY //////////////////////////////////////////////////////////////////
+
+function updateModalFieldVisibility() {
+  const typeSelect = document.getElementById('tracker-type');
+  const feedContainer = document.getElementById('tracker-modal-feed-container');
+  const titleInput = document.getElementById('tracker-title');
+  const titleSelect = document.getElementById('tracker-selected-title');
+  const feedSelect = document.getElementById('tracker-selected-feed');
+  
+  if (!typeSelect) return;
+  
+  const type = typeSelect.value;
+  
+  if (type === 'json') {
+    // for json, show feed container, hide title input, show title select
+    if (feedContainer) feedContainer.style.display = 'block';
+    if (titleInput) titleInput.style.display = 'none';
+    if (titleSelect) {
+      titleSelect.style.display = 'block';
+      titleSelect.removeAttribute('hidden');
+    }
+  } else if (type.startsWith('github')) {
+    // for github, show feed selector with options
+    if (feedContainer) feedContainer.style.display = 'block';
+    if (feedSelect) {
+      feedSelect.innerHTML = `
+        <option value="commits">Commits</option>
+        <option value="releases">Releases</option>
+        <option value="issues">Issues</option>
+        <option value="discussions">Discussions</option>
+      `;
+    }
+    if (titleInput) titleInput.style.display = 'block';
+    if (titleSelect) {
+      titleSelect.style.display = 'none';
+      titleSelect.setAttribute('hidden', '');
+    }
+  } else {
+    // default, hide feed container, show title input
+    if (feedContainer) feedContainer.style.display = 'none';
+    if (titleInput) titleInput.style.display = 'block';
+    if (titleSelect) {
+      titleSelect.style.display = 'none';
+      titleSelect.setAttribute('hidden', '');
+    }
+    // everything else, same
+  }
+}
+
+// JSON KEY SELECTION /////////////////////////////////////////////////////////////////////////////
+
+async function fetchAndPopulateJsonKeys(url) {
+  if (!url) return;
+  
+  const titleSelect = document.getElementById('tracker-selected-title');
+  const feedSelect = document.getElementById('tracker-selected-feed');
+  const faviconInput = document.getElementById('edit-tracker-favicon');
+  const redirectInput = document.getElementById('tracker-url');
+  
+  if (titleSelect) titleSelect.innerHTML = '<option value="">Loading...</option>';
+  if (feedSelect) feedSelect.innerHTML = '<option value="">Loading...</option>';
+  
+  try {
+    // Auto-populate favicon and redirect
     try {
-        const detected = await detectTrackerType(url);
-        const urlObj = detected.url.startsWith('http') ? new URL(detected.url) : null;
-        if (detected.type === 'rss') {
-            if (urlObj && urlObj.hostname.includes('reddit.com')) {
-                if (urlObj.pathname.includes('/comments/')) {
-                    typeDisplay.textContent = 'Reddit Post';
-                } else {
-                    typeDisplay.textContent = 'Subreddit';
-                }
-            } else {
-                typeDisplay.textContent = 'RSS Feed';
-            }
-        } else {
-            const typeLabels = {
-                'youtube': 'YouTube Channel',
-                'github-commits': 'GitHub Commits',
-                'github-releases': 'GitHub Releases',
-                'github-issues': 'GitHub Issues',
-                'github-discussions': 'GitHub Discussions',
-                'twitch': 'Twitch Stream',
-                'crypto': 'Cryptocurrency',
-                'weather': 'Weather',
-                'stock': 'Stock Price',
-                'medium': 'Medium Author',
-                'devto': 'Dev.to Author',
-                'substack': 'Substack Newsletter',
-                'mastodon': 'Mastodon User'
-            };
-            typeDisplay.textContent = typeLabels[detected.type] || 'RSS Feed';
-        }
-    } catch (e) {
-        typeDisplay.textContent = 'Invalid URL';
+      const urlObj = new URL(url);
+      const faviconUrl = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
+      if (faviconInput) faviconInput.value = faviconUrl;
+      if (redirectInput) redirectInput.value = url;
+      
+      tempTrackerData.faviconUrl = faviconUrl;
+      tempTrackerData.redirectUrl = url;
+    } catch (e) {}
+    
+    // Fetch JSON
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const json = await response.json();
+    const keys = getFlattenedKeys(json);
+    
+    if (keys.length === 0) {
+      if (titleSelect) titleSelect.innerHTML = '<option value="">No keys found</option>';
+      if (feedSelect) feedSelect.innerHTML = '<option value="">No keys found</option>';
+      return;
     }
+    
+    // Populate dropdowns
+    if (titleSelect) titleSelect.innerHTML = '';
+    if (feedSelect) feedSelect.innerHTML = '';
+    
+    keys.forEach(keyObj => {
+      const displayValue = String(keyObj.value).substring(0, 50);
+      const optionText = `${keyObj.path} = ${displayValue}`;
+      
+      if (titleSelect) {
+        const titleOption = document.createElement('option');
+        titleOption.value = keyObj.path;
+        titleOption.textContent = optionText;
+        titleSelect.appendChild(titleOption);
+      }
+      
+      if (feedSelect) {
+        const feedOption = document.createElement('option');
+        feedOption.value = keyObj.path;
+        feedOption.textContent = optionText;
+        feedSelect.appendChild(feedOption);
+      }
+    });
+    
+  } catch (error) {
+    if (titleSelect) titleSelect.innerHTML = '<option value="">Failed to fetch JSON</option>';
+    if (feedSelect) feedSelect.innerHTML = '<option value="">Failed to fetch JSON</option>';
+    console.error('JSON fetch error:', error);
+  }
 }
 
-function normalizeUrl(url) {
-    url = url.trim();
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
-    }
-    return url;
-}
+// SAVE TRACKER ///////////////////////////////////////////////////////////////////////////////////
 
-async function getYouTubeChannelId(username) {
-    try {
-        const pageUrl = `https://www.youtube.com/@${username}`;
-        const response = await fetch(pageUrl);
-        const html = await response.text();
-        const patterns = [
-            /"channelId":"(UC[^"]+)"/,
-            /"browseId":"(UC[^"]+)"/,
-            /channel\/(UC[A-Za-z0-9_-]+)/
-        ];
-        for (const pattern of patterns) {
-            const match = html.match(pattern);
-            if (match) return match[1];
-        }
-        throw new Error('getYouTubeChannelId: could not scrape channel ID');
-    } catch (error) {
-        throw new Error(`getYouTubeChannelId: Could not find channel ID for @${username}. Try entering the channel as: youtube.com/channel/UC...`);
-    }
-}
-async function detectTrackerType(url) {
-    try {
-        const originalUrl = url.trim();
-        const cryptoMap = {
-            'bitcoin': 'bitcoin',
-            'btc': 'bitcoin',
-            'ethereum': 'ethereum',
-            'eth': 'ethereum',
-            'cardano': 'cardano',
-            'ada': 'cardano',
-            'ripple': 'ripple',
-            'xrp': 'ripple',
-            'dogecoin': 'dogecoin',
-            'doge': 'dogecoin',
-            'solana': 'solana',
-            'sol': 'solana',
-            'polkadot': 'polkadot',
-            'dot': 'polkadot',
-            'litecoin': 'litecoin',
-            'ltc': 'litecoin'
-        }; // 0.6
-        if (cryptoMap[originalUrl.toLowerCase()]) {
-            return { 
-                type: 'crypto', 
-                url: cryptoMap[originalUrl.toLowerCase()]
-            };
-        }
-        const weatherPatterns = [
-            /^weather\s+(?:in|for)\s+(.+)$/i,
-            /^(.+)\s+weather$/i,
-            /^weather\s+(.+)$/i
-        ];
-        for (const pattern of weatherPatterns) {
-            const match = originalUrl.match(pattern);
-            if (match) {
-                const location = match[1].trim();
-                return { type: 'weather', url: location };
-            }
-        }
-        if (/^[A-Z]{1,5}$/.test(originalUrl)) {
-            return { type: 'stock', url: originalUrl };
-        }
-        url = normalizeUrl(url);
-        const urlObj = new URL(url);
-        const hostname = urlObj.hostname.replace('www.', '');
-        const pathname = urlObj.pathname;
-        if (hostname.includes('twitch.tv')) {
-            const username = pathname.split('/').filter(Boolean)[0];
-            if (username) {
-                return { type: 'twitch', url: username };
-            }
-        }
-        if (hostname.includes('medium.com') && pathname.includes('/@')) {
-            return { 
-                type: 'medium', 
-                url: `https://medium.com/feed${pathname.split('?')[0]}` 
-            };
-        }
-        if (hostname.includes('dev.to')) {
-            const username = pathname.split('/').filter(Boolean)[0];
-            if (username) {
-                return { 
-                    type: 'devto', 
-                    url: `https://dev.to/feed/${username}` 
-                };
-            }
-        }
-        if (hostname.includes('substack.com')) {
-            let baseUrl = url.split('?')[0].replace(/\/$/, '');
-            return { 
-                type: 'substack', 
-                url: `${baseUrl}/feed` 
-            };
-        }
-        if (hostname.includes('mastodon') && pathname.includes('/@')) {
-            let cleanUrl = url.split('?')[0].replace(/\/$/, '');
-            return { 
-                type: 'mastodon', 
-                url: `${cleanUrl}.rss` 
-            };
-        }
-        if (hostname.includes('youtube.com')) {
-            if (pathname.includes('/@')) {
-                const username = pathname.split('/@')[1].split('/')[0];
-                const channelId = await getYouTubeChannelId(username);
-                return { 
-                    type: 'youtube', 
-                    url: `https://www.youtube.com/channel/${channelId}` 
-                };
-            }
-            if (pathname.includes('/channel/')) {
-                const channelId = pathname.split('/channel/')[1].split('/')[0].split('?')[0];
-                return { 
-                    type: 'youtube', 
-                    url: `https://www.youtube.com/channel/${channelId}` 
-                };
-            }
-        }
-        if (hostname.includes('github.com')) {
-            if (pathname.includes('/commits') || pathname.match(/^\/[^/]+\/[^/]+\/?$/)) {
-                return { type: 'github-commits', url: url.split('/commits')[0].split('?')[0] };
-            }
-            if (pathname.includes('/releases')) {
-                return { type: 'github-releases', url: url.split('/releases')[0].split('?')[0] };
-            }
-            if (pathname.includes('/issues')) {
-                return { type: 'github-issues', url: url.split('/issues')[0].split('?')[0] };
-            }
-            if (pathname.includes('/discussions')) {
-                return { type: 'github-discussions', url: url.split('/discussions')[0].split('?')[0] };
-            }
-            return { type: 'github-commits', url: url.split('?')[0] };
-        }
-        if (hostname.includes('reddit.com')) {
-            let cleanUrl = url.split('?')[0];
-            cleanUrl = cleanUrl.replace('.json', '');
-            if (!cleanUrl.endsWith('.rss')) {
-                cleanUrl = cleanUrl.replace(/\/$/, '') + '/.rss';
-            }
-            return { type: 'rss', url: cleanUrl };
-        }
-        return { type: 'rss', url: url };
-    } catch (error) {
-        return { type: 'rss', url: normalizeUrl(url) };
-    }
-}
-
-async function handleAddTracker() {
-    let url = document.getElementById('tracker-url')?.value.trim();
-    const title = document.getElementById('tracker-title')?.value.trim();
-    const saveBtn = document.getElementById('save-tracker');
-    if (!url) {
-        alert('Please enter a URL');
-        return;
-    }
-    const originalText = saveBtn.textContent;
-    saveBtn.textContent = 'Fetching Info...';
+async function handleSaveTracker() {
+  const modal = document.getElementById('tracker-modal');
+  const mode = modal?.getAttribute('display-mode');
+  const saveBtn = document.getElementById('save-edit-tracker');
+  const originalText = saveBtn?.textContent || 'Save';
+  
+  // Get all field values
+  const sourceInput = document.getElementById('tracker-source');
+  const typeSelect = document.getElementById('tracker-type');
+  const titleInput = document.getElementById('tracker-title');
+  const titleSelect = document.getElementById('tracker-selected-title');
+  const feedSelect = document.getElementById('tracker-selected-feed');
+  const faviconInput = document.getElementById('edit-tracker-favicon');
+  const redirectInput = document.getElementById('tracker-url');
+  const intervalInput = document.getElementById('edit-tracker-interval');
+  const limitInput = document.getElementById('edit-tracker-limit');
+  
+  const source = sourceInput?.value.trim() || '';
+  const type = typeSelect?.value || 'rss';
+  const title = titleInput?.value.trim() || '';
+  const titleKey = titleSelect?.value || '';
+  const feedKey = feedSelect?.value || '';
+  const faviconUrl = faviconInput?.value.trim() || '';
+  const redirectUrl = redirectInput?.value.trim() || '';
+  const interval = parseInt(intervalInput?.value || '5') * 60000;
+  const limit = parseInt(limitInput?.value || '200');
+  
+  // Validation
+  if (!source) {
+    notify('Missing Source', 'Please enter a source URL');
+    return;
+  }
+  
+  if (type === 'json' && (!titleKey || !feedKey)) {
+    notify('Missing Selection', 'Please select keys for title and feed');
+    return;
+  }
+  
+  if (isNaN(interval) || interval < 60000) {
+    notify('Invalid Interval', 'Update interval must be at least 1 minute');
+    return;
+  }
+  
+  if (isNaN(limit) || limit < 1) {
+    notify('Invalid Limit', 'Daily limit must be at least 1');
+    return;
+  }
+  
+  if (saveBtn) {
+    saveBtn.textContent = 'Saving...';
     saveBtn.disabled = true;
-    try {
-        const detected = await detectTrackerType(url);
-        const type = detected.type;
-        url = detected.url;
-        saveBtn.textContent = 'Adding...';
-        await addTracker({
-            type: type,
-            url: url,
-            title: title || extractTitleFromUrl(url, type)
-        });
-        ModalManager.hide('add-tracker-modal');
-    } catch (error) {
-        alert(`tracker-ui: failed on ${error.message}`);
-    } finally {
-        saveBtn.textContent = originalText;
-        saveBtn.disabled = false;
+  }
+  
+  try {
+    // Update temp data with user inputs
+    tempTrackerData.title = title || tempTrackerData.title;
+    tempTrackerData.faviconUrl = faviconUrl || tempTrackerData.faviconUrl;
+    tempTrackerData.redirectUrl = redirectUrl || tempTrackerData.redirectUrl;
+    tempTrackerData.updateInterval = interval;
+    tempTrackerData.dailyRequestLimit = limit;
+    
+    // JSON-specific config
+    if (type === 'json') {
+      tempTrackerData.config = {
+        titleKey: titleKey,
+        feedKey: feedKey
+      };
+      tempTrackerData.apiEndpoint = source;
+      
+      // 🆕 Fetch the JSON to get the actual title value
+      try {
+        const response = await fetch(source);
+        if (response.ok) {
+          const jsonData = await response.json();
+          const actualTitle = getNestedValue(jsonData, titleKey);
+          tempTrackerData.title = actualTitle ? String(actualTitle) : (title || 'JSON Feed');
+        } else {
+          tempTrackerData.title = title || 'JSON Feed';
+        }
+      } catch (fetchError) {
+        console.error('Failed to fetch JSON for title:', fetchError);
+        tempTrackerData.title = title || 'JSON Feed';
+      }
     }
-}
-
-function extractTitleFromUrl(url, type) {
-    try {
-        if (type === 'crypto') {
-            return url.charAt(0).toUpperCase() + url.slice(1);
-        }
-        if (type === 'weather') {
-            return `${url} Weather`;
-        }
-        if (type === 'stock') {
-            return url;
-        }
-        if (type === 'twitch') {
-            return `Twitch: ${url}`;
-        }
-        const urlObj = new URL(url);
-        if (urlObj.hostname.includes('youtube.com')) {
-            const channelId = urlObj.pathname.split('/').pop();
-            return `YouTube: ${channelId}`;
-        }
-        if (urlObj.hostname.includes('reddit.com')) {
-            return `Reddit: ${urlObj.pathname}`;
-        }
-        if (urlObj.hostname.includes('github.com')) {
-            const parts = urlObj.pathname.split('/').filter(Boolean);
-            if (parts.length >= 2) {
-                return `${parts[0]}/${parts[1]}`;
-            }
-        }
-        return urlObj.hostname;
-    } catch (e) {
-        return 'New Tracker';
+    
+    if (mode === 'add') {
+      await addTracker(tempTrackerData);
+      notify('Tracker Added', `${tempTrackerData.title} has been added`);
+    } else {
+      // Update existing
+      const index = state.trackers.findIndex(t => t.id === tempTrackerData.id);
+      if (index !== -1) {
+        state.trackers[index] = tempTrackerData;
+        await saveTrackers();
+        await updateTracker(tempTrackerData.id);
+        renderTrackers();
+        notify('Tracker Updated', `${tempTrackerData.title} has been updated`);
+      }
     }
+    
+    closeTrackerModal();
+    
+  } catch (error) {
+    notify('Save Failed', error.message);
+    console.error('Save error:', error);
+  } finally {
+    if (saveBtn) {
+      saveBtn.textContent = originalText;
+      saveBtn.disabled = false;
+    }
+  }
 }

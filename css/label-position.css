@@ -22,12 +22,22 @@ body:has(#tabs-btn[style="display: flex;"]) {
 
 .header[label-position="bottom-left"] {
     position: absolute;
-    bottom: 20px;
+    bottom: 0px;
     left: 20px;
+}
+body:has(#trackers-btn[style="display: flex;"]) {
+    .header[label-position="bottom-left"] {
+        left: 68px !important;
+    }
 }
 
 .header[label-position="bottom-right"] {
     position: absolute;
-    bottom: 20px;
+    bottom: 0px;
     right: 20px;
+}
+body:has(#content-label[label-style="double-shadow"]) {
+    .header[label-position="bottom-right"], .header[label-position="bottom-left"] {
+        bottom: 20px;
+    }    
 }

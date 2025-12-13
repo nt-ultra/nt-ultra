@@ -148,24 +148,22 @@ function handleGridDragOver(e) {
 }
 
 function handleGridDrop(e) {
-    console.log('Grid drop fired');
     if (!dragState.isDragging) {
-        console.log('Not dragging, ignoring drop');
         return;
     }
     e.stopPropagation();
     e.preventDefault();
     const originalIndex = dragState.draggedIndex;
     const visualDropIndex = dragState.placeholderIndex;
-    console.log('Original index:', originalIndex);
-    console.log('Visual drop index:', visualDropIndex);
-    console.log('Before:', state.shortcuts.map(s => s.title));
+    // console.log('Original index:', originalIndex);
+    // console.log('Visual drop index:', visualDropIndex);
+    // console.log('Before:', state.shortcuts.map(s => s.title));
     if (originalIndex !== visualDropIndex) {
         const shortcuts = [...state.shortcuts];
         const [draggedItem] = shortcuts.splice(originalIndex, 1);
-        console.log('After removal:', shortcuts.map(s => s.title));
+        // console.log('After removal:', shortcuts.map(s => s.title));
         shortcuts.splice(visualDropIndex, 0, draggedItem);
-        console.log('After insertion:', shortcuts.map(s => s.title));
+        // console.log('After insertion:', shortcuts.map(s => s.title));
         shortcuts.forEach((shortcut, idx) => {
             shortcut.order = idx;
         });

@@ -6,6 +6,7 @@ export const default_settings = {
     displayShortcuts: true,
     displayTabBrowser: 'disabled',
     displayTrackers: false,
+    displayNotifications: 'page',
     themeBgColor: '',
     themeFgColor: '',
     themeAccentColor: '',
@@ -18,7 +19,7 @@ export const default_settings = {
     labelFontSize: 48,
     labelContent: 'none',
     labelStyle: 'none',
-    shortcutMaxLimit: 24, // 84
+    shortcutMaxLimit: 24,
     shortcutScaling: 100,
     shortcutGridColumns: 8,
     shortcutTitlesHover: false,

@@ -1,5 +1,6 @@
 import { state } from '../core/state.js';
 import { saveShortcuts } from '../core/database.js';
+import ContextMenuManager from '../core/context-manager.js';
 import { normalizeUrl, getCleanHostname, getFaviconUrl } from '../utils/url-helpers.js';
 import { isDragging, initShortcutDragDrop } from './shortcuts-dragdrop.js';
 
@@ -29,16 +30,21 @@ export function renderShortcuts() {
             const img = document.createElement('img');
             img.src = shortcut.icon;
             img.alt = "  ";
+            let retryCount = 0;
+            const maxRetries = 2;
             img.onerror = function() {
-                setTimeout(() => {
-                    if (!this.complete || this.naturalWidth === 0) {
-                        this.style.display = 'none';
-                        const placeholder = document.createElement('div');
-                        placeholder.className = 'shortcut-icon-placeholder';
-                        placeholder.textContent = shortcut.title[0].toUpperCase();
-                        icon.appendChild(placeholder);
-                    }
-                }, 100);
+                if (retryCount < maxRetries) {
+                    retryCount++;
+                    setTimeout(() => {
+                        this.src = this.src;
+                    }, 500 * retryCount);
+                } else {
+                    img.style.display = 'none';
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'shortcut-icon-placeholder';
+                    placeholder.textContent = shortcut.title[0].toUpperCase();
+                    icon.appendChild(placeholder);
+                }
             };
             icon.appendChild(img);
         } else {
@@ -52,7 +58,13 @@ export function renderShortcuts() {
         menuBtn.innerHTML = '⋮';
         menuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            showContextMenu(e, shortcut);
+            ContextMenuManager.show(e, shortcut, [
+                { action: 'pin', label: shortcut.pinned ? 'Unpin' : 'Pin', handler: () => togglePin(shortcutId) },
+                { action: 'edit', label: 'Edit', handler: () => editShortcut(shortcut) },
+                { action: 'open', label: 'Open in New Tab', handler: () => window.open(shortcut.url, '_blank') },
+                { action: 'copy', label: 'Copy Link', handler: () => navigator.clipboard.writeText(shortcut.url) },
+                { action: 'delete', label: 'Delete', danger: true, handler: () => deleteShortcut(shortcutId) }
+            ]);
         });
         icon.appendChild(menuBtn);
         
@@ -104,7 +116,7 @@ export function renderShortcuts() {
 
 export function addShortcut() {
     if (state.shortcuts.length >= state.settings.shortcutMaxLimit) {
-        alert(`Maximum ${state.settings.shortcutMaxLimit} shortcuts allowed`);
+        notify('Shortcut Limit Reached', `Maximum ${state.settings.shortcutMaxLimit} shortcuts allowed`);
         return;
     }
     state.creatingShortcut = true;
@@ -156,11 +168,11 @@ export function saveEdit() {
     const customIcon = document.getElementById('edit-icon').value.trim();
     const url = normalizeUrl(urlInput);
     if (!url) {
-        alert('Please enter a valid URL');
+        notify('Shortcut URL Needed', `Please enter a valid URL`);
         return;
     }
     if (!title) {
-        alert('Please enter a title');
+        notify('Shortcut Title Missing', `Please enter a title`);
         return;
     }
     const icon = customIcon || getFaviconUrl(url);
@@ -224,7 +236,7 @@ export function handleUrlInput(e) {
 export function createShortcutFromData(title, url, iconUrl) {
     const cleanUrl = normalizeUrl(url);
     if (!cleanUrl) {
-        console.error('Invalid URL dropped');
+        // console.error('Invalid URL dropped');
         return;
     }
     const newShortcut = {
@@ -238,19 +250,5 @@ export function createShortcutFromData(title, url, iconUrl) {
     state.shortcuts.push(newShortcut);
     saveShortcuts();
     renderShortcuts();
-    console.log('✓ Shortcut created:', newShortcut.title);
-}
-
-export function showContextMenu(e, shortcut) {
-    const menu = document.getElementById('context-menu');
-    const pinBtn = menu.querySelector('[data-action="pin"]');
-    pinBtn.textContent = shortcut.pinned ? 'Unpin' : 'Pin';
-    menu.style.display = 'block';
-    menu.style.left = `${e.clientX}px`;
-    menu.style.top = `${e.clientY}px`;
-    menu.dataset.shortcutId = shortcut.id;
-}
-
-export function hideContextMenu() {
-    document.getElementById('context-menu').style.display = 'none';
+    console.log('createShortcutFromData:', newShortcut.title);
 }

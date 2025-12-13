@@ -1,5 +1,7 @@
 import { state } from '../core/state.js';
 import { dbGet } from '../core/database.js';
+import { notify } from '../core/notify.js';
+import { exportToFile, exportToClipboard, importFromFile, importFromClipboard } from '../core/database-io.js';
 import { renderWallpapers } from '../wallpapers/wallpapers.js';
 import { updateSetting, toggleDisplayExpandedSettings, resetEverything, confirmReset } from './settings.js';
 
@@ -16,7 +18,7 @@ export function initSettingsUI() {
                 state.wallpapers = wallpapers;
                 renderWallpapers();
             }
-            console.log('settings-ui: wallpaper loaded...');
+            console.log('...settings-ui: wallpapers loaded...');
         }
         //lazy load these modules
         if (!settingsModulesLoaded) {
@@ -30,7 +32,7 @@ export function initSettingsUI() {
             initWallpapersUI();
             initThemesUI();
             settingsModulesLoaded = true;
-            console.log('settings-ui: settings modules loaded...');
+            console.log('...settings-ui: settings modules loaded...');
         }
     });
     
@@ -64,6 +66,9 @@ export function initSettingsUI() {
     });
     document.getElementById('display-trackers').addEventListener('change', (e) => {
         updateSetting('displayTrackers', e.target.value === 'on');
+    });
+    document.getElementById('display-notifications').addEventListener('change', (e) => {
+        updateSetting('displayNotifications', e.target.value);
     });
     document.getElementById('theme-border-radius').addEventListener('input', (e) => {
         document.getElementById('theme-border-radius-value').textContent = e.target.value;
@@ -142,6 +147,139 @@ export function initSettingsUI() {
     document.getElementById('reset-modal').addEventListener('click', (e) => {
         if (e.target.id === 'reset-modal') {
             document.getElementById('reset-modal').style.display = 'none';
+        }
+    });
+
+    // Database Section
+    initDatabaseImportExport();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+export function initDatabaseImportExport() {
+    document.getElementById('export-data-btn').addEventListener('click', () => {
+        document.getElementById('export-data-modal').style.display = 'flex';
+        document.getElementById('e-d-themes').checked = true;
+        document.getElementById('e-d-wallpapers').checked = true;
+        document.getElementById('e-d-shortcuts').checked = true;
+        document.getElementById('e-d-trackers').checked = true;
+    });
+    document.getElementById('cancel-e-d').addEventListener('click', () => {
+        document.getElementById('export-data-modal').style.display = 'none';
+    });
+    document.getElementById('export-data-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'export-data-modal') {
+            document.getElementById('export-data-modal').style.display = 'none';
+        }
+    });
+    document.getElementById('confirm-e-d-file').addEventListener('click', async () => {
+        const options = {
+            includeThemes: document.getElementById('e-d-themes').checked,
+            includeWallpapers: document.getElementById('e-d-wallpapers').checked,
+            includeShortcuts: document.getElementById('e-d-shortcuts').checked,
+            includeTrackers: document.getElementById('e-d-trackers').checked
+        };
+        if (!options.includeThemes && !options.includeWallpapers && 
+            !options.includeShortcuts && !options.includeTrackers) {
+            notify('Database Export', 'Nothing is selected');
+            return;
+        }
+        try {
+            await exportToFile(options);
+            document.getElementById('export-data-modal').style.display = 'none';
+            notify('Database Exported', 'File successfully sent to user');
+        } catch (error) {
+            notify('Database Export failed', `${error.message}`);
+        }
+    });
+
+    document.getElementById('confirm-e-d-clipboard').addEventListener('click', async () => {
+        const options = {
+            includeThemes: document.getElementById('e-d-themes').checked,
+            includeWallpapers: document.getElementById('e-d-wallpapers').checked,
+            includeShortcuts: document.getElementById('e-d-shortcuts').checked,
+            includeTrackers: document.getElementById('e-d-trackers').checked
+        };
+        if (!options.includeThemes && !options.includeWallpapers && 
+            !options.includeShortcuts && !options.includeTrackers) {
+            notify('Database Export', 'Nothing is selected');
+            return;
+        }
+        try {
+            await exportToClipboard(options);
+            document.getElementById('export-data-modal').style.display = 'none';
+            notify('Database Exported', 'Data copied to clipboard');
+        } catch (error) {
+            notify('Database Export failed', `${error.message}`);
+        }
+    });
+
+    // Import Data Modal
+    document.getElementById('import-data-btn').addEventListener('click', () => {
+        document.getElementById('import-data-modal').style.display = 'flex';
+        document.getElementById('i-d-themes').checked = true;
+        document.getElementById('i-d-wallpapers').checked = true;
+        document.getElementById('i-d-shortcuts').checked = true;
+        document.getElementById('i-d-trackers').checked = true;
+    });
+    document.getElementById('cancel-i-d').addEventListener('click', () => {
+        document.getElementById('import-data-modal').style.display = 'none';
+    });
+    document.getElementById('import-data-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'import-data-modal') {
+            document.getElementById('import-data-modal').style.display = 'none';
+        }
+    });
+
+    document.getElementById('confirm-i-d-file').addEventListener('click', () => {
+        const options = {
+            includeThemes: document.getElementById('i-d-themes').checked,
+            includeWallpapers: document.getElementById('i-d-wallpapers').checked,
+            includeShortcuts: document.getElementById('i-d-shortcuts').checked,
+            includeTrackers: document.getElementById('i-d-trackers').checked
+        };
+        if (!options.includeThemes && !options.includeWallpapers && 
+            !options.includeShortcuts && !options.includeTrackers) {
+            notify('Database Import', 'Please make a selection');
+            return;
+        }
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.json,application/json';
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+                await importFromFile(file, options);
+                document.getElementById('import-data-modal').style.display = 'none';
+                notify('Database Imported', 'Import successful');
+                location.reload();
+            } catch (error) {
+                notify('Database Import failed', `${error.message}`);
+            }
+        });
+        fileInput.click();
+    });
+
+    document.getElementById('confirm-i-d-clipboard').addEventListener('click', async () => {
+        const options = {
+            includeThemes: document.getElementById('i-d-themes').checked,
+            includeWallpapers: document.getElementById('i-d-wallpapers').checked,
+            includeShortcuts: document.getElementById('i-d-shortcuts').checked,
+            includeTrackers: document.getElementById('i-d-trackers').checked
+        };
+        if (!options.includeThemes && !options.includeWallpapers && 
+            !options.includeShortcuts && !options.includeTrackers) {
+            notify('Database Import', 'PLease make a selection');
+            return;
+        }
+        try {
+            await importFromClipboard(options);
+            document.getElementById('import-data-modal').style.display = 'none';
+            notify('Database Import', 'Import successful');
+            location.reload();
+        } catch (error) {
+            notify('Database Import failed', `${error.message}`);
         }
     });
 }

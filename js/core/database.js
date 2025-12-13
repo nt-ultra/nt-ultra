@@ -113,6 +113,13 @@ export async function loadData() {
         }
         let trackers = await dbGet('trackers', 'data');
         if (trackers && Array.isArray(trackers)) {
+            trackers = trackers.map(t => ({
+                ...t,
+                dailyRequestLimit: t.dailyRequestLimit || 200,
+                requestCount: t.requestCount || 0,
+                requestResetTime: t.requestResetTime || Date.now() + (24 * 60 * 60 * 1000),
+                rateLimitedUntil: t.rateLimitedUntil || null
+            }));
             state.trackers = trackers;
         } else {
             state.trackers = [];
@@ -146,7 +153,7 @@ export async function saveShortcuts() {
         if (window.syncModule) {
             await window.syncModule.backupToSync('shortcuts_data', state.shortcuts);
         }
-    } catch (error) {
+    } catch (error) {z
         console.error('Error saving shortcuts:', error);
     }
 }

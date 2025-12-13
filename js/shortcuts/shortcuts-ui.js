@@ -1,24 +1,8 @@
 import { state } from '../core/state.js';
-import { 
-    renderShortcuts, 
-    addShortcut, 
-    editShortcut, 
-    deleteShortcut, 
-    togglePin, 
-    saveEdit, 
-    closeEditModal, 
-    handleUrlInput,
-    showContextMenu,
-    hideContextMenu,
-    createShortcutFromData
-} from './shortcuts.js';
-import { 
-    importShortcuts, 
-    importFromFirefox, 
-    exportShortcutsToFile, 
-    exportShortcutsToClipboard, 
-    parseShortcutsText 
-} from './shortcuts-io.js';
+import { notify } from '../core/notify.js';
+import ContextMenuManager from '../core/context-manager.js';
+import { renderShortcuts, addShortcut, editShortcut, deleteShortcut, togglePin, saveEdit, closeEditModal, handleUrlInput, createShortcutFromData } from './shortcuts.js';
+import { importShortcuts, importFromFirefox, exportShortcutsToFile, exportShortcutsToClipboard, parseShortcutsText } from './shortcuts-io.js';
 
 export function initShortcutsUI() {
     document.getElementById('edit-url').addEventListener('input', handleUrlInput);
@@ -39,7 +23,7 @@ export function initShortcutsUI() {
             closeEditModal();
         }
     });
-    // Context menu
+    // context menu
     const shortcutsGrid = document.getElementById('shortcuts-grid');
     if (shortcutsGrid) {
         shortcutsGrid.addEventListener('contextmenu', (e) => {
@@ -49,40 +33,15 @@ export function initShortcutsUI() {
             const shortcutId = parseInt(shortcutEl.dataset.shortcutId);
             const shortcut = state.shortcuts.find(s => s.id === shortcutId);
             if (!shortcut) return;
-            showContextMenu(e, shortcut);
+            ContextMenuManager.show(e, shortcut, [
+                { action: 'pin', label: shortcut.pinned ? 'Unpin' : 'Pin', handler: () => togglePin(shortcutId) },
+                { action: 'copy', label: 'Copy Link', handler: () => navigator.clipboard.writeText(shortcut.url) },
+                { action: 'open', label: 'Open in New Tab', handler: () => window.open(shortcut.url, '_blank') },
+                { action: 'edit', label: 'Edit', handler: () => editShortcut(shortcut) },
+                { action: 'delete', label: 'Delete', danger: true, handler: () => deleteShortcut(shortcutId) }
+            ]);
         });
     }
-    document.getElementById('context-menu').addEventListener('click', (e) => {
-        const action = e.target.dataset.action;
-        const shortcutId = parseInt(document.getElementById('context-menu').dataset.shortcutId);
-        const shortcut = state.shortcuts.find(s => s.id === shortcutId);
-        if (!shortcut) return;
-        switch (action) {
-            case 'pin':
-                togglePin(shortcutId);
-                break;
-            case 'edit':
-                editShortcut(shortcut);
-                break;
-            case 'open':
-                window.open(shortcut.url, '_blank');
-                break;
-            case 'copy':
-                navigator.clipboard.writeText(shortcut.url);
-                break;
-            case 'delete':
-                deleteShortcut(shortcutId);
-                break;
-        }
-        hideContextMenu();
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('#context-menu') && !e.target.closest('.shortcut-menu-btn')) {
-            hideContextMenu();
-        }
-    });
-
     // Drag & drop for shortcuts container
     const shortcutsContainer = document.querySelector('.shortcuts-container');
     if (shortcutsContainer) {
@@ -93,7 +52,7 @@ export function initShortcutsUI() {
         shortcutsContainer.addEventListener('drop', (e) => {
             e.preventDefault();
             if (state.shortcuts.length >= state.settings.shortcutMaxLimit) {
-                alert(`Maximum ${state.settings.shortcutMaxLimit} shortcuts allowed`);
+                notify('Shortcut limit reached', `Maximum ${state.settings.shortcutMaxLimit} shortcuts allowed`);
                 return;
             }
             try {
@@ -137,7 +96,7 @@ export function initShortcutsUI() {
                 createShortcutFromData(title, url, null);
                 return;
             }
-            console.log('Dropped data not recognized as tab or bookmark');
+            notify('Shortcut could not be created',`Link, URL or bookmark seems invalid`);
         });
     }
 }
@@ -216,7 +175,7 @@ export function initShortcutsImportExport() {
     document.getElementById('confirm-import-shortcuts-text').addEventListener('click', async () => {
         const text = document.getElementById('import-shortcuts-input').value.trim();
         if (!text) {
-            alert('Please paste the shortcut data');
+            notify('No Shortcuts Imported', 'Please paste the shortcut data');
             return;
         }
         try {

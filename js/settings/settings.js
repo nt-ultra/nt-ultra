@@ -7,6 +7,7 @@ export function renderSettings() {
     document.getElementById('display-shortcuts').value = state.settings.displayShortcuts ? 'on' : 'off';
     document.getElementById('display-tab-browser').value = state.settings.displayTabBrowser;
     document.getElementById('display-trackers').value = state.settings.displayTrackers ? 'on' : 'off';
+    document.getElementById('display-notifications').value = state.settings.displayNotifications;
     const themeControls = document.getElementById('theme-controls');
     themeControls.style.display = state.settings.displayExpandedSettings ? 'block' : 'none';
     document.getElementById('theme-controls-toggle-btn').textContent = 
@@ -173,7 +174,7 @@ export async function confirmReset() {
     const resetShortcuts = document.getElementById('reset-shortcuts').checked;
     
     if (!resetThemes && !resetWallpapers && !resetShortcuts) {
-        alert('Huh? You dont have anything selected..');
+        notify('Database Reset', 'Nothing is selected');
         return;
     }
     
@@ -203,10 +204,9 @@ export async function confirmReset() {
             await saveShortcuts();
         }
         document.getElementById('reset-modal').style.display = 'none';
-        console.log('Reset complete, reloading...');
         location.reload();
     } catch (error) {
         console.error('Reset error:', error);
-        alert('Failed to reset. Please try again.');
+        notify('Database Reset', 'Failed to reset. Please try again');
     }
 }

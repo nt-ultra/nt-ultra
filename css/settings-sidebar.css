@@ -249,3 +249,7 @@ body:has(.tabs-item.dragging) {
     outline-color: color-mix(in srgb, var(--accent-color) 80%, transparent);
   }
 }
+
+#database-section .btn {
+    margin-bottom: 4px;
+}

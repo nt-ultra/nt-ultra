@@ -108,6 +108,11 @@
                         <option value="on">On</option>
                         <option value="off">Off</option>
                     </select>
+                    <label class="label">Notifications</label>
+                    <select id="display-notifications" class="input">
+                        <option value="page">Show In Page</option>
+                        <option value="desktop">Show as Desktop Notifications</option>
+                    </select>
                     <label class="label">Theme</label>
                     <select id="theme-mode" class="input">
                         <option value="default">Default</option>
@@ -148,11 +153,8 @@
                         </div> -->
                     </div>
                     <div id="display-expanded-theme-settings" class="style-controls-state">
-                        <button id="theme-controls-remove-btn" class="style-controls-remove-btn">Delete</button>
-                        <button id="theme-controls-add-btn" class="style-controls-add-btn">Save</button>
-                        <button id="theme-controls-reset-btn" class="style-controls-reset-btn">Reset</button>
-                        <button id="theme-controls-import-btn" class="style-controls-toggle-btn">Import</button>
-                        <button id="theme-controls-export-btn" class="style-controls-toggle-btn">Export</button>
+                        <button id="theme-controls-remove-btn" class="style-controls-remove-btn">Delete Theme</button>
+                        <button id="theme-controls-add-btn" class="style-controls-add-btn">Create Theme</button>
                         <button id="theme-controls-toggle-btn" class="style-controls-toggle-btn">Expand</button>
                     </div>
                 </div>
@@ -183,6 +185,9 @@
                         <option value="none">None</option>
                         <option value="double-shadow">Extended Shadow</option>
                         <option value="basic-border">Basic Border</option>
+                        <option value="blurry-texture">Blur Texture</option>
+                        <option value="shiny-texture">Shiny Texture</option>
+                        <option value="stone-texture">Stone Texture</option>
                     </select>    
                     <label class="label">Scaling: <span id="label-font-size-value">48</span>px</label>
                     <input type="range" id="label-font-size" class="slider" min="24" max="96" value="48">
@@ -211,17 +216,27 @@
                     <div class="checkbox-span">
                         <span>Shortcut menu hidden (right click)</span><input type="checkbox" id="shortcut-menus-hidden">
                     </div>
-                    <div class="style-controls-state">
-                        <button id="import-shortcuts-btn" class="import-shortcuts-btn">Import</button>
-                        <button id="export-shortcuts-btn" class="export-shortcuts-btn">Export</button>
-                    </div>
-                </div>
                 </div>
 
                 <!-- Tab Browser Section -->
                 <div class="settings-section" id="tab-browser-section" style="display: none;">
                     <h3>Tab Browser</h3>
-                    <label class="label">There is no war in Ba Sing Se ☁️ ☁️ .:::...</label>
+                    <label class="label" style="opacity: 0.1;">There is no war in Ba Sing Se ☁️ ☁️ .:::...</label>
+                </div>
+                
+                <!-- Database management Section -->
+                <div class="settings-section" id="database-section">
+                    <h3>Database</h3>
+                    <label class="label">Manage All Data</label>
+                    <button id="import-data-btn" class="btn btn-secondary">Import Data</button>
+                    <button id="export-data-btn" class="btn btn-secondary">Export Data</button>
+                    <button id="theme-controls-reset-btn" class="btn btn-secondary">Reset Everything</button>
+                    <label class="label">Manage Themes & Settings</label>
+                    <button id="theme-controls-import-btn" class="btn btn-secondary">Import New Theme</button>
+                    <button id="theme-controls-export-btn" class="btn btn-secondary">Export Your Theme</button>
+                    <label class="label">Manage Shortcuts</label>
+                    <button id="import-shortcuts-btn" class="btn btn-secondary">Import Shortcuts</button>
+                    <button id="export-shortcuts-btn" class="btn btn-secondary">Export Shortcuts</button>
                 </div>
             </div>
         </div>
@@ -267,6 +282,15 @@
                     </button>
                     <span class="trackers-footer-count">Trackers (<span id="trackers-count">0</span>)<span class="experimental-label"> EXPERIMENTAL</span></span>
                 </div>
+            </div>
+        </div>
+
+
+        <!-- notification -->
+        <div id="notify" class="notify" style="display: none;">
+            <div class="modal-content">
+                    <p id="notify-source"></p>
+                    <p id="notify-message"></p>
             </div>
         </div>
 
@@ -455,6 +479,57 @@
             </div>
         </div>
 
+        <div id="import-data-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>Import Settings</h3>
+                <p style="margin-bottom: 16px; font-size: 10px; color: color-mix(in srgb, var(--element-fg-color) 70%, transparent);">
+                    Choose which data you want import
+                </p>
+                <div class="checkbox-span">
+                    <span>All themes & settings</span><input type="checkbox" id="i-d-themes" checked>
+                </div>
+                <div class="checkbox-span">
+                    <span>All Wallpapers</span><input type="checkbox" id="i-d-wallpapers" checked>
+                </div>
+                <div class="checkbox-span">
+                    <span>All Shortcuts</span><input type="checkbox" id="i-d-shortcuts" checked>
+                </div>
+                <div class="checkbox-span">
+                    <span>All Trackers</span><input type="checkbox" id="i-d-trackers" checked>
+                </div>
+                <div class="modal-actions">
+                    <button id="cancel-i-d" class="btn btn-secondary">Cancel</button>
+                    <button id="confirm-i-d-file" class="btn btn-primary">Import File</button>
+                    <button id="confirm-i-d-clipboard" class="btn btn-primary">Clipboard</button>
+                </div>
+            </div>
+        </div>
+        <div id="export-data-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>Export Settings</h3>
+                <p style="margin-bottom: 16px; font-size: 10px; color: color-mix(in srgb, var(--element-fg-color) 70%, transparent);">
+                    Choose which data you want export
+                </p>
+                <div class="checkbox-span">
+                    <span>All themes & settings</span><input type="checkbox" id="e-d-themes" checked>
+                </div>
+                <div class="checkbox-span">
+                    <span>All Wallpapers</span><input type="checkbox" id="e-d-wallpapers" checked>
+                </div>
+                <div class="checkbox-span">
+                    <span>All Shortcuts</span><input type="checkbox" id="e-d-shortcuts" checked>
+                </div>
+                <div class="checkbox-span">
+                    <span>All Trackers</span><input type="checkbox" id="e-d-trackers" checked>
+                </div>
+                <div class="modal-actions">
+                    <button id="cancel-e-d" class="btn btn-secondary">Cancel</button>
+                    <button id="confirm-e-d-file" class="btn btn-primary">Export File</button>
+                    <button id="confirm-e-d-clipboard" class="btn btn-primary">Clipboard</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Import Shortcuts Modal -->
         <div id="import-shortcuts-modal" class="modal" style="display: none;">
             <div class="modal-content">
@@ -511,22 +586,71 @@
             </div>
         </div>
 
-        <!-- Add Tracker Modal -->
-        <div id="add-tracker-modal" class="modal" style="display: none;">
+        <div id="tracker-modal" class="modal" mode="add or edit or json" style="display: none;">
             <div class="modal-content">
-                <h3>Add Tracker</h3>
-                <label class="label">Tracking: <span id="tracker-type-display" style="color: var(--accent-color); font-weight: 600;">...</span></label>
-                <label class="label">URL</label>
-                <input type="text" id="tracker-url" class="input" placeholder="Enter URL...">
-                <label class="label">Title (optional)</label>
-                <input type="text" id="tracker-title" class="input" placeholder="auto-detected from feed">
+                <h3 id="tracker-modal-mode">Add Tracker</h3>
+                
+                <label class="label">Tracker Type</label>
+                <p class="input-hint">Tracker type will be auto-detected once you link to a source</p>
+                <select id="tracker-type" class="input">
+                    <option value="rss">RSS Feed</option>
+                    <option value="json">JSON Feed</option>
+                    <option value="crypto">Crypto</option>
+                    <option value="devto">Dev.to</option>
+                    <option value="github">Github</option>
+                    <option value="mastodon">Mastodon User</option>
+                    <option value="medium">Medium</option>
+                    <option value="stock">Stocks</option>
+                    <option value="substack">Substack</option>
+                    <option value="twitch">Twitch User</option>
+                    <option value="twitter">Twitter User</option>
+                    <option value="weather">Weather</option>
+                    <option value="youtube">Youtube Channel</option>
+                </select>
+
+                <label class="label">Source</label>
+                <p class="input-hint">Try: 'weather in New York', 'btc', 'https://www.reddit.com/r/news/' or 'https://news.yahoo.com/rss/mostviewed'</p>
+                <input type="text" id="tracker-source" class="input" placeholder="https://...">
+
+                <label class="label">Title</label>
+                <p class="input-hint">Choose a title for this tracker</p>
+                <input type="text" id="tracker-title" class="input" placeholder="Tracker title">
+                <select hidden id="tracker-selected-title" class="input"></select>
+                
+                <div id="tracker-modal-feed-container">
+                <label class="label">Feed</label>
+                <p class="input-hint">Choose a feed for this tracker</p>
+                <select id="tracker-selected-feed" class="input"></select>
+                </div>
+
+                <label class="label">Favicon</label>
+                <p class="input-hint">Choose a custom icon instead of the default favicon</p>
+                <input type="text" id="edit-tracker-favicon" class="input" placeholder="https://...">
+
+                <label class="label">Redirect</label>
+                <p class="input-hint">When clicking on this tracker, where does it take you?</p>
+                <input type="text" id="tracker-url" class="input" placeholder="https://...">
+
+                <div style="border-top:1px dashed rgba(97, 97, 97, 0.6); margin: 5px 0 20px 0;"></div>
+
+                <label class="label" style="opacity: 0.5;">Tracker ID</label>
+                <input type="text" id="edit-tracker-id" class="input" disabled>
+
+                <label class="label">Update Interval</label>
+                <p class="input-hint">This tracker will update every X minutes</p>
+                <input type="number" id="edit-tracker-interval" class="input" placeholder="5" min="1" max="1440">
+                
+                <label class="label">Daily Rate Limit</label>
+                <p class="input-hint">This tracker will update X times a day</p>
+                <input type="number" id="edit-tracker-limit" class="input" placeholder="200" min="1" max="1000">
+                
                 <div class="modal-actions">
-                    <button id="save-tracker" class="btn btn-primary">Add Tracker</button>
-                    <button id="cancel-tracker" class="btn btn-secondary">Cancel</button>
+                    <button id="cancel-edit-tracker" class="btn btn-secondary">Cancel</button>
+                    <button id="save-edit-tracker" class="btn btn-primary">Save Tracker</button>
                 </div>
             </div>
         </div>
-        
+
         <input type="file" id="wallpaper-file-input" accept="image/*" style="display: none;">
         <input type="file" id="import-theme-file-input" accept=".json,application/json" style="display: none;">
         <input type="file" id="import-shortcuts-file-input" accept=".txt,text/plain" style="display: none;">

@@ -31,7 +31,7 @@ async function loadTabsFromBrowser() {
             };
         });
     } catch (error) {
-        console.error('Error loading tabs:', error);
+        console.error('loadTabsFromBrowser: Error loading tabs:', error);
         tabsSidebarState.tabs = [];
     }
 }
@@ -213,7 +213,7 @@ async function switchToTab(tabId, windowId) {
         await browserAPI.windows.update(windowId, { focused: true });
         await browserAPI.tabs.update(tabId, { active: true });
     } catch (error) {
-        console.error('Error switching to tab:', error);
+        console.error('switchToTab: Error switching to tab:', error);
     }
 }
 
@@ -224,7 +224,7 @@ async function closeTab(tabId) {
         await loadTabsFromBrowser();
         renderTabsSidebar();
     } catch (error) {
-        console.error('Error closing tab:', error);
+        console.error('switchToTab: Error closing tab:', error);
     }
 }
 
@@ -234,14 +234,13 @@ async function toggleTabMute(tabId, muted) {
         await loadTabsFromBrowser();
         renderTabsSidebar();
     } catch (error) {
-        console.error('Error toggling tab mute:', error);
+        console.error('switchToTab: Error muting tab:', error);
     }
 }
 
 function toggleTabsSidebar() {
     const sidebar = document.getElementById('tabs-sidebar');
     if (!sidebar) return;
-    
     tabsSidebarState.isOpen = !tabsSidebarState.isOpen;
     if (tabsSidebarState.isOpen) {
         sidebar.classList.add('open');

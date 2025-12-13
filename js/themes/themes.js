@@ -28,7 +28,7 @@ function getUniqueThemeName(baseName) {
 
 export async function addTheme() {
     if (state.themeList.length >= themeMaxLimit) {
-        alert(`Maximum ${themeMaxLimit} themes allowed`);
+        notify('Theme Limit Reached', `Maximum ${themeMaxLimit} themes allowed`);
         return;
     }
     document.getElementById('add-theme-modal').style.display = 'flex';
@@ -40,7 +40,7 @@ export async function confirmAddTheme() {
     const input = document.getElementById('add-theme-name').value;
     const validation = validateThemeName(input);
     if (!validation.valid) {
-        alert(validation.error);
+        notify('Theme Name Invalid', validation.error);
         return;
     }
     let themeName = validation.name;
@@ -59,7 +59,7 @@ export async function confirmAddTheme() {
     if (window.render) {
         window.render();
     }
-    console.log(`Theme '${themeName}' added successfully`);
+    notify(`New Theme Created`,`'${themeName}' saved to themes`)
 }
 
 export async function removeTheme() {
@@ -79,7 +79,7 @@ export async function removeTheme() {
         fallbackTheme = state.themeList[currentIndex - 1] || 'custom';
     }
     await switchTheme(fallbackTheme);
-    console.log(`Theme '${currentTheme}' removed`);
+    notify('Theme Deleted',`'${currentTheme}' removed from themes`)
 }
 
 export async function switchTheme(mode) {
@@ -131,7 +131,7 @@ export async function confirmExportFile() {
     a.click();
     URL.revokeObjectURL(url);
     document.getElementById('export-theme-modal').style.display = 'none';
-    console.log('Theme exported as file');
+    notify('Theme Exported', 'Theme file succesfully sent to user');
 }
 
 export async function confirmExportCopy() {
@@ -142,7 +142,7 @@ export async function confirmExportCopy() {
     const jsonString = JSON.stringify(themeData, null, 2);
     try {
         await navigator.clipboard.writeText(jsonString);
-        alert('Theme JSON copied to clipboard!');
+        notify('Theme Exported', 'Theme JSON copied to clipboard');
     } catch (error) {
         const textarea = document.createElement('textarea');
         textarea.value = jsonString;
@@ -152,10 +152,9 @@ export async function confirmExportCopy() {
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
-        alert('Theme JSON copied to clipboard!');
+        notify('Theme Exported', 'Theme JSON copied to clipboard');
     }
     document.getElementById('export-theme-modal').style.display = 'none';
-    console.log('Theme JSON copied');
 }
 
 export async function importTheme() {
@@ -177,7 +176,7 @@ export async function processThemeImport(jsonString) {
     try {
         const themeData = JSON.parse(jsonString);
         if (!themeData.name || !themeData.settings) {
-            alert('Invalid theme file: missing name or settings');
+            notify('Theme File Invalid', 'File is missing name or settings');
             return;
         }
         const validation = validateThemeName(themeData.name);
@@ -186,7 +185,7 @@ export async function processThemeImport(jsonString) {
             themeName = getUniqueThemeName(themeName);
         }
         if (state.themeList.length >= themeMaxLimit) {
-            alert(`Maximum ${themeMaxLimit} themes allowed`);
+            notify('Theme Limit Reached', `Maximum ${themeMaxLimit} themes allowed`);
             return;
         }
         const newThemeSettings = { ...default_settings, ...themeData.settings, themeMode: themeName };
@@ -201,10 +200,8 @@ export async function processThemeImport(jsonString) {
             window.render();
         }
         const authorInfo = themeData.author ? ` by ${themeData.author}` : '';
-        alert(`Theme '${themeName}'${authorInfo} imported successfully!`);
-        console.log(`Theme imported: ${themeName}`, themeData);
+        notify('Theme Imported', `'${themeName}' by ${authorInfo} has been imported`);
     } catch (error) {
-        console.error('Import error:', error);
-        alert('Failed to import theme. Please check the JSON format.');
+        notify('Theme Import Failed', `processThemeImport failed, ${error}`);
     }
 }

@@ -49,19 +49,19 @@ export function parseShortcutsText(text) {
 
 export async function importShortcuts(shortcuts) {
     if (shortcuts.length === 0) {
-        alert('No shortcuts imported. Try checking your format, or if you already have these shortcuts.');
+        notify('No Shortcuts Imported', 'Try checking your format, or if you already have these shortcuts.');
         return;
     }
     state.shortcuts.push(...shortcuts);
     await saveShortcuts();
     renderShortcuts();
     document.getElementById('import-shortcuts-modal').style.display = 'none';
-    alert(`✓ Imported ${shortcuts.length} shortcuts!`);
+    notify('Shortcuts Imported', `${shortcuts.length} shortcuts were imported`);
 }
 
 export async function importFromFirefox(pinnedSites) {
     if (!Array.isArray(pinnedSites) || pinnedSites.length === 0) {
-        alert('Invalid data or no shortcuts found');
+        notify('No Shortcuts Imported', 'invalid data or no shortcuts found');
         return;
     }
     const shortcuts = [];
@@ -103,14 +103,14 @@ export async function exportShortcutsToFile() {
     a.download = 'ntultra-shortcuts.txt';
     a.click();
     URL.revokeObjectURL(url);
-    alert('Shortcuts exported to file!');
+    notify('Shortcuts Exported', 'Shortcuts exported to file');
 }
 
 export async function exportShortcutsToClipboard() {
     const text = exportShortcutsText();
     try {
         await navigator.clipboard.writeText(text);
-        alert('Shortcuts copied to clipboard!');
+        notify('Shortcuts Exported', 'Shortcuts copied to clipboard');
     } catch (error) {
         const textarea = document.createElement('textarea');
         textarea.value = text;
@@ -120,6 +120,6 @@ export async function exportShortcutsToClipboard() {
         textarea.select();
         document.execCommand('copy');
         document.body.removeChild(textarea);
-        alert('Shortcuts copied to clipboard!');
+        notify('Shortcuts Exported', 'Shortcuts copied to clipboard');
     }
 }

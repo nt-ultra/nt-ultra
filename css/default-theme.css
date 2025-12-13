@@ -19,41 +19,34 @@
 }
 
 body[theme-blur] {
-    .settings-sidebar {
-        background: color-mix(in srgb, var(--element-bg-color) 80%, transparent) !important;
-    }
-    .settings-content {
+    .settings-sidebar { background: color-mix(in srgb, var(--element-bg-color) 80%, transparent) !important; }
+
+    .tabs-sidebar { background: color-mix(in srgb, var(--element-bg-color) 20%, transparent) !important; }
+    
+    .trackers-sidebar { background: color-mix(in srgb, var(--element-bg-color) 20%, transparent) !important; }
+    
+    .modal-content { background: color-mix(in srgb, var(--element-bg-color) 40%, transparent) !important; }
+    
+    .shortcut-menu-btn { background: color-mix(in srgb, var(--element-bg-color) 10%, transparent) !important; }
+    
+    .settings-content, .tabs-sidebar, .trackers-sidebar, .modal-content, .shortcut-menu-btn
+    {
         backdrop-filter: blur(10px) !important;
     }
-    .tabs-sidebar {
-        background: color-mix(in srgb, var(--element-bg-color) 20%, transparent) !important;
-        backdrop-filter: blur(10px) !important;
-    }
-    .tabs-item:not(.active) {
+    
+    .tabs-item:not(.active),
+    .tracker-item
+    {
         background: var(--more-blur) !important;
         border: 1px solid color-mix(in srgb, white 3%, transparent);
     }
-    .trackers-sidebar {
-        background: color-mix(in srgb, var(--element-bg-color) 20%, transparent) !important;
-        backdrop-filter: blur(10px) !important;
-    }
-    .tracker-item {
-        background: var(--more-blur) !important;
-        border: 1px solid color-mix(in srgb, white 3%, transparent);
-    }
-    .modal-content {
-        background: color-mix(in srgb, var(--element-bg-color) 40%, transparent) !important;
-        backdrop-filter: blur(10px) !important;
-    }
-    .shortcut-menu-btn {
-        background: color-mix(in srgb, var(--element-bg-color) 10%, transparent) !important;
-        backdrop-filter: blur(10px) !important;
-    }
-    .settings-sidebar *:not(select):not(option) {
-        --element-layered-bg-color: var(--more-blur) !important;
-    }
-    select:not(:focus) {
-        background-color: var(--more-blur) !important;
-    }
+    
+    .settings-sidebar *:not(select):not(option) {--element-layered-bg-color: var(--more-blur) !important;}
+    
+    select:not(:focus) {background-color: var(--more-blur) !important;}
+    
+    .modal *:not(select):not(option) { --element-layered-bg-color: var(--more-blur) !important;}
+
+    .modal *:not(select):not(option) { --element-layered-bg-color: var(--more-blur) !important;}
 }
 

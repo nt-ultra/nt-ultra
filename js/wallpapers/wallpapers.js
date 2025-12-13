@@ -74,8 +74,8 @@ export function removeCurrentWallpaper() {
 }
 
 export function openWallpaperModal() {
-    if (state.wallpapers.length >= 8) {
-        alert('Maximum 8 wallpapers allowed');
+    if (state.wallpapers.length >= 10) {
+        notify('Wallpaper Limit Reached', `Only 10 wallpapers are allowed`);
         return;
     }
     document.getElementById('wallpaper-modal').style.display = 'flex';

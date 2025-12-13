@@ -3,15 +3,26 @@
 ### <ins>Priorities/Notes</ins>
 
 - folders and folder placements, not handled within the shortcut grid.
-- shortcut data needs a constant
-- may need to include wallpaper importing/exporting (its just convenient)
-- modal management can probably be handled differently (html seems cluttered)
-- trackers-sidebar files need a plan (structure)
-- context menu can be expanded to sidebars
-- selects need to be styled (css)
-- Clean importing of shortcuts through a delete first toggle in module
+- modal management can probably be handled differently (html seems cluttered) (TOP PRIORITY)
+- sidebar footer section: need help, version indicator, possibly full import/export handling ^, reset everything moved here (partically done)
+- need help module: view the documentation option, generate error log option, post an issue option.
 
 # Version History
+
+### <ins>NT Ultra 0.6-beta</ins>
+
+- Notification system introduced to replace all default (disruptive) alerts
+- Option to display notifications in page or as desktop.
+- Settings Sidebar restructured once again with a new Database Section
+- Settings Sidebar - Database section, for handling import/export/reset operations
+- Trackers module structure (rewritten)
+- Trackers Sidebar collapsed position adjustment
+- Trackers description for crypto/stocks adjusted
+- Trackers now open in current tab on click, new tab on middle click
+- Trackers can now be editted after creation. Right Click -> Edit
+- Trackers can now be created from JSONs (key extraction!)
+- Wallpapers can now be import/exported, note: exported files are usually ~20Kb, so wallpaper data strings make up the entire difference
+- New Label Styles (animated background textures, blur, stone, shine)
 
 ### <ins>NT Ultra 0.5-beta</ins>
 

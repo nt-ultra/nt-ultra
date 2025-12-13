@@ -31,6 +31,11 @@
     flex: 1;
 }
 
+.modal-content p {
+    font-size: 11px;
+    margin-bottom: 5px;
+    opacity: 0.5;
+}
 
 #add-theme-modal {
     .label {
@@ -145,5 +150,34 @@
             background: rgb(255,100,100);
             border: none;       
         }
+    }
+}
+
+#notify {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    min-width: 400px;
+    transform: translateX(-50%);
+    padding-inline: 1%;
+    display: flex;
+    justify-content: center;
+    z-index: 401;
+    & .modal-content {
+        margin-top: 16px;
+        height: fit-content;
+        transition: all 0.5s ease;
+        user-select: none;
+    }
+    & #notify-source {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    &:hover .modal-content  {
+        transform:scale(0.8);
+    }
+    &:active .modal-content  {
+        transform:scale(1.1);
     }
 }

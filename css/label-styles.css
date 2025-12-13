@@ -11,3 +11,40 @@
     outline-offset: 20px;
     border-radius: calc(var(--element-border-radius) - 10px) !important;
 }
+
+#content-label[label-style="blurry-texture"] {
+	background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKJ2xPOaLC4mMxW1E73nJ3bGWbWC_ETBqvdg&s");
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: color-mix(in srgb, var(--element-fg-color) 0%, transparent);
+	background-size: contain;
+	-webkit-text-stroke: 1px #8ec79c6e;
+    animation: rotatetexture 30s infinite;
+    opacity: 0.65;
+}
+
+#content-label[label-style="shiny-texture"] {
+	background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbIWgZ5VYA3z9gwkVRWgTHgkkfBStlTdTf1g&s");
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: color-mix(in srgb, var(--element-fg-color) 70%, transparent);
+	background-size: contain;
+	-webkit-text-stroke: 1px #c78e8e6e;
+    animation: rotatetexture 20s infinite;
+}
+
+#content-label[label-style="stone-texture"] {
+	background-image: url("https://cdn.architextures.org/textures/22/03/calacatta-vena-623331f97921c-1200.jpg");
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-size: contain;
+	-webkit-text-stroke: 1px #889499;
+    animation: rotatetexture 20s infinite;
+}
+
+@keyframes rotatetexture {
+	0% {background-position: -20%;}
+	10% {background-position: 1;}
+	100% {background-position: 20%;}
+}

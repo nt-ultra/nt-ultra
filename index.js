@@ -1,4 +1,5 @@
 import { initDB, loadData } from './js/core/database.js';
+import { notify } from './js/core/notify.js';
 import { renderShortcuts } from './js/shortcuts/shortcuts.js';
 import { initShortcutsUI, initShortcutsImportExport } from './js/shortcuts/shortcuts-ui.js';
 import { renderLabel } from './js/label/label.js';
@@ -23,6 +24,7 @@ function render() {
 
 window.render = render;
 window.applyStyles = applyStyles;
+window.notify = notify;
 
 // Event Listeners ////////////////////////////////
 document.addEventListener('DOMContentLoaded', async () => {
@@ -45,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!isInitted) {
         setTimeout(() => {
             document.body.toggleAttribute('initted', true);
-            console.log('Index: Initted?', document.body.hasAttribute('initted'));
+            console.log('...Index: Initted?...', document.body.hasAttribute('initted'));
         }, 2100); // after 2 seconds we can consider the page init,  used with animate-launch.css
     }
 

@@ -146,7 +146,7 @@ html {
 .add-shortcut:hover {
     opacity: 1;
     & .add-shortcut-icon {
-        border: 2px dashed rgba(31, 31, 31, 0.15);
+        border: 1px solid rgba(200, 200, 200, 0.15);
     }
 }
 .add-shortcut-icon {
@@ -154,12 +154,11 @@ html {
     height: 64px;
     border-radius: calc(var(--element-border-radius) + 6px);
     background: rgba(31, 31, 31, 0.1);
-    border: 2px dashed rgba(31, 31, 31, 0.1);
+    border: 1px solid rgba(200, 200, 200, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
 }
-/* last 3 code blocks ^ cooked. */
 
 .btn {
     width: 100%;
@@ -179,19 +178,17 @@ html {
 .btn-primary {
     background: var(--accent-color);
     color: var(--element-fg-color);
-}
-
-.btn-primary:hover {
-    background: color-mix(in srgb, var(--accent-color) 70%, white);
+    &:hover {
+        background: color-mix(in srgb, var(--accent-color) 80%, white);
+    }
 }
 
 .btn-secondary {
     background: var(--element-layered-bg-color);
     color: var(--element-fg-color);
-}
-
-.btn-secondary:hover {
-    background: #4b5563;
+    &:hover {
+        background: color-mix(in srgb, var(--element-layered-bg-color) 90%, white);
+    }
 }
 
 .context-menu {
