@@ -19,6 +19,7 @@
 ### <ins>NT Ultra 0.7-beta</ins>
 
 - Trackers Sidebar button more accurately represents the UI
+- Trackers also see some internal spacing improvement
 - Context menu options for turning links and tabs into shortcuts (outside of the extension)
 - New Display option to hide sidebar buttons off hover
 - New Searchbar feature with optional providers, enabled in Display Settings
