@@ -7,12 +7,20 @@
     <link rel="icon" href="./static/logo128.png">
     <link rel="stylesheet" href="index.css">
 </head>
-<body>
+<body ntu="true">
     <div id="app">
 
         <!-- header/label/greeting Section -->
         <div class="header">
             <h1 id="content-label">New Tab Ultra</h1>
+        </div>
+
+        <div class="search-container" style="display: none;">
+            <div class="searchbar">
+                <input placeholder="Search the web">
+            </div>
+            <div id="search-suggestions" style="display: none;">
+            </div>
         </div>
 
         <!-- Shortcuts Grid -->
@@ -39,8 +47,12 @@
             </svg>
         </button>
         <button id="trackers-btn" class="trackers-btn" style="display: none;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <!-- <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <path d="M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-3l-5 5v-5H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h12z"/>
+            </svg> -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <circle cx="6" cy="8" r="2.3" /><circle cx="12" cy="8" r="2.3" /><circle cx="18" cy="8" r="2.3" />
+                <circle cx="6" cy="16" r="2.3" /><circle cx="12" cy="16" r="2.3" /><circle cx="18" cy="16" r="2.3" />
             </svg>
         </button>
 
@@ -89,6 +101,11 @@
                     </select>
                     <label class="label">Label</label>
                     <select id="display-label" class="input">
+                        <option value="on">On</option>
+                        <option value="off">Off</option>
+                    </select>
+                    <label class="label">Search bar</label>
+                    <select id="display-searchbar" class="input">
                         <option value="on">On</option>
                         <option value="off">Off</option>
                     </select>
@@ -141,6 +158,9 @@
                         <label class="label">Additional settings</label>
                         <div class="checkbox-span">
                             <span>Enable more blur around the UI</span><input type="checkbox" id="theme-blur">
+                        </div>
+                        <div class="checkbox-span">
+                            <span>Sidebar Buttons reveal on hover</span><input type="checkbox" id="theme-sidebar-btns-on-hover">
                         </div>
                         <!-- <div class="checkbox-span">
                             <span>This checkbox is purely cosmetic</span><input type="checkbox" id="na">
@@ -296,11 +316,6 @@
 
         <!-- context menu -->
         <div id="context-menu" class="context-menu" style="display: none;">
-            <button class="context-menu-item" data-action="pin">Pin</button>
-            <button class="context-menu-item" data-action="edit">Edit</button>
-            <button class="context-menu-item" data-action="open">Open in New Tab</button>
-            <button class="context-menu-item" data-action="copy">Copy Link</button>
-            <button class="context-menu-item danger" data-action="delete">Delete</button>
         </div>
 
         <!-- Edit Modal -->
@@ -314,8 +329,8 @@
                 <label class="label">Custom Icon URL (optional)</label>
                 <input type="text" id="edit-icon" class="input">
                 <div class="modal-actions">
-                    <button id="save-edit" class="btn btn-primary">Save</button>
                     <button id="cancel-edit" class="btn btn-secondary">Cancel</button>
+                    <button id="save-edit" class="btn btn-primary">Save</button>
                 </div>
             </div>
         </div>

@@ -4,6 +4,7 @@ import { saveSettings, saveShortcuts, saveWallpapers, saveCurrentWallpaper, save
 export function renderSettings() {
     document.getElementById('font-family').value = state.settings.fontFamily;
     document.getElementById('display-label').value = state.settings.displayLabel ? 'on' : 'off';
+    document.getElementById('display-searchbar').value = state.settings.displaySearchbar ? 'on' : 'off';
     document.getElementById('display-shortcuts').value = state.settings.displayShortcuts ? 'on' : 'off';
     document.getElementById('display-tab-browser').value = state.settings.displayTabBrowser;
     document.getElementById('display-trackers').value = state.settings.displayTrackers ? 'on' : 'off';
@@ -20,6 +21,7 @@ export function renderSettings() {
     document.getElementById('theme-animation-speed').value = state.settings.themeAnimationSpeed;
     document.getElementById('theme-animation-speed-value').textContent = state.settings.themeAnimationSpeed;
     document.getElementById('theme-blur').checked = state.settings.themeBlur;
+    document.getElementById('theme-sidebar-btns-on-hover').checked = state.settings.themeSidebarBtnOnHover;
     document.getElementById('theme-wallpaper-dimness').value = state.settings.themeWallpaperDimness;
     document.getElementById('theme-wallpaper-dimness-value').textContent = state.settings.themeWallpaperDimness;
     document.getElementById('content-label').value = state.settings.labelContent;
@@ -40,8 +42,9 @@ export function renderSettings() {
     // Show/hide sections
     document.getElementById('label-section').style.display = state.settings.displayLabel ? 'block' : 'none';
     document.getElementById('shortcuts-section').style.display = state.settings.displayShortcuts ? 'block' : 'none';
-    document.getElementById('tab-browser-section').style.display = 
-        state.settings.displayTabBrowser !== 'disabled' ? 'block' : 'none';
+    // document.getElementById('searchbar-section').style.display = state.settings.displaySearchbar ? 'block' : 'none';
+    // document.getElementById('tab-browser-section').style.display = 
+    //     state.settings.displayTabBrowser !== 'disabled' ? 'block' : 'none';
     const userNameInput = document.getElementById('user-name');
     userNameInput.style.display =
         (state.settings.labelContent === 'greetings' || state.settings.labelContent === 'timeOfDay')
@@ -97,6 +100,7 @@ export function applyStyles() {
     const dimValue = state.settings.themeWallpaperDimness / 10;
     app.style.background = `rgba(0, 0, 0, ${dimValue})`;
     body.toggleAttribute('theme-blur', state.settings.themeBlur);
+    body.toggleAttribute('theme-sidebar-btns-on-hover', state.settings.themeSidebarBtnOnHover);
     
     if (tabsSidebar && tabsBtn) {
         window.tabsSidebarMode = state.settings.displayTabBrowser;

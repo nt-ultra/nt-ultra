@@ -13,11 +13,18 @@
     "homepage": "index.html"
   },
   "permissions": [
-    "tabs"
+    "tabs",
+    "contextMenus",
+    "storage"
   ],
   "host_permissions": [
     "<all_urls>"
   ],
+  "background": {
+    "scripts": [
+      "js/core/background.js"
+    ]
+  },
   "minimum_chrome_version": "114",
   "browser_specific_settings": {
     "gecko": {

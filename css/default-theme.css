@@ -50,3 +50,23 @@ body[theme-blur] {
     .modal *:not(select):not(option) { --element-layered-bg-color: var(--more-blur) !important;}
 }
 
+
+body[theme-sidebar-btns-on-hover] {
+    /* .settings-btn:not(:hover) { top: 10px; right: 10px; }
+    .tabs-btn:not(:hover) { top: 10px; left: 10px; }
+    .trackers-btn:not(:hover) { bottom: 10px; left: 10px; } */
+    .settings-btn, .tabs-btn, .trackers-btn {
+        transition: width 0.1s, height 0.1s, opacity 0.5s;
+        &::before {
+            content: ""; width: 200px; height: 200px; position: fixed;
+        }
+        &:not(:hover) {
+            transform: scale(0.2);
+            background: var(--element-fg-color);
+            opacity: 0.1;
+        }
+        &:hover::before {
+            display: none;
+        }
+    }
+}

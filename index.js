@@ -1,9 +1,10 @@
 import { initDB, loadData } from './js/core/database.js';
 import { notify } from './js/core/notify.js';
-import { renderShortcuts } from './js/shortcuts/shortcuts.js';
+import { renderShortcuts, checkPendingShortcuts } from './js/shortcuts/shortcuts.js';
 import { initShortcutsUI, initShortcutsImportExport } from './js/shortcuts/shortcuts-ui.js';
 import { renderLabel } from './js/label/label.js';
 import { initLabelUI } from './js/label/label-ui.js';
+import { renderSearchbar, initSearchbar } from './js/search/searchbar.js';
 import { renderWallpapers } from './js/wallpapers/wallpapers.js';
 import { renderThemeDropdown, renderSettings, applyStyles } from './js/settings/settings.js';
 import { initSettingsUI } from './js/settings/settings-ui.js';
@@ -13,6 +14,7 @@ import { initTrackersUI } from './js/trackers-sidebar/trackers-ui.js';
 
 function render() {
     renderLabel();
+    renderSearchbar();
     renderShortcuts();
     renderWallpapers();
     renderSettings();
@@ -30,12 +32,14 @@ window.notify = notify;
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('...Initializing IndexedDB...');
     await initDB();
-    console.log('...IndexedDB initialized...');
     await loadData();
-
+    console.log('...IndexedDB initialized...');
+    await checkPendingShortcuts();
+    
     initShortcutsUI();
     initShortcutsImportExport();
     initLabelUI();
+    initSearchbar();
     initSettingsUI();
     initTabsSidebar();
     initTrackersUI();

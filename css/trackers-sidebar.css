@@ -165,7 +165,10 @@
 
 /* info card */
 .tracker-info {
-    flex: 1;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: space-between; 
     min-width: 0;
 }
 .tracker-title {
@@ -184,11 +187,12 @@
     /* -webkit-line-clamp: 2; */
     -webkit-box-orient: vertical;
     overflow: hidden;
+    margin-bottom: 8px;
 }
 .tracker-meta {
     font-size: 11px;
     color: color-mix(in srgb, var(--element-fg-color) 40%, transparent);
-    margin-top: 8px;
+    margin-top: auto;
 }
 .tracker-delete {
     position: absolute;

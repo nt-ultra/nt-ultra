@@ -252,3 +252,69 @@ export function createShortcutFromData(title, url, iconUrl) {
     renderShortcuts();
     console.log('createShortcutFromData:', newShortcut.title);
 }
+
+// background.js
+if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'add-shortcuts') {
+      const shortcuts = message.shortcuts;
+      let addedCount = 0;
+      let skippedCount = 0;
+      shortcuts.forEach(shortcut => {
+        const exists = state.shortcuts.some(s => s.url === shortcut.url);
+        if (!exists && state.shortcuts.length < state.settings.shortcutMaxLimit) {
+          shortcut.order = state.shortcuts.length;
+          state.shortcuts.push(shortcut);
+          addedCount++;
+        } else {
+          skippedCount++;
+        }
+      });
+      if (addedCount > 0) {
+        saveShortcuts();
+        renderShortcuts();
+        const message = addedCount === 1 
+          ? `"${shortcuts[0].title}" has been turned into a shortcut`
+          : `You've recieved ${addedCount} new shortcuts`;
+        notify('Shortcut Added', message);
+      } else if (skippedCount > 0) {
+        notify('Already Exists', 'shortcut already exist');
+      }
+    }
+    return true;
+  });
+}
+export async function checkPendingShortcuts() {
+  if (typeof chrome === 'undefined' || !chrome.storage) return;
+  try {
+    const result = await chrome.storage.local.get(['pendingShortcuts']);
+    const pending = result.pendingShortcuts || [];
+    if (pending.length > 0) {
+      let addedCount = 0;
+      let skippedCount = 0;
+      pending.forEach(shortcut => {
+        const exists = state.shortcuts.some(s => s.url === shortcut.url);
+        if (!exists && state.shortcuts.length < state.settings.shortcutMaxLimit) {
+          shortcut.order = state.shortcuts.length;
+          state.shortcuts.push(shortcut);
+          addedCount++;
+        } else {
+          skippedCount++;
+        }
+      });
+      if (addedCount > 0) {
+        await saveShortcuts();
+        renderShortcuts();
+        const message = addedCount === 1 
+          ? `"${pending[0].title}" has been turned into a shortcut`
+          : `You've recieved ${addedCount} new shortcuts`;
+        notify('Shortcut Added', message);
+      } else if (skippedCount > 0) {
+        notify('Shortcut Already Exists', 'shortcut already exist');
+      }
+      await chrome.runtime.sendMessage({ action: 'clear-pending-shortcuts' });
+    }
+  } catch (error) {
+    console.error('checkPendingShortcuts:', error);
+  }
+}

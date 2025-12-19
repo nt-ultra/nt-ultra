@@ -53,6 +53,9 @@ export function initSettingsUI() {
     document.getElementById('display-label').addEventListener('change', (e) => {
         updateSetting('displayLabel', e.target.value === 'on');
     });
+    document.getElementById('display-searchbar').addEventListener('change', (e) => {
+        updateSetting('displaySearchbar', e.target.value === 'on');
+    });
     document.getElementById('display-shortcuts').addEventListener('change', (e) => {
         updateSetting('displayShortcuts', e.target.value === 'on');
     });
@@ -85,6 +88,9 @@ export function initSettingsUI() {
     });
     document.getElementById('theme-blur').addEventListener('change', (e) => {
         updateSetting('themeBlur', e.target.checked);
+    });
+    document.getElementById('theme-sidebar-btns-on-hover').addEventListener('change', (e) => {
+        updateSetting('themeSidebarBtnOnHover', e.target.checked);
     });
 
     // Shortcuts settings

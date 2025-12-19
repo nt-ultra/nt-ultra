@@ -3,6 +3,7 @@ export const default_settings = {
     fontFamily: 'system-ui',
     themeMode: 'default',
     displayLabel: true,
+    displaySearchbar: false,
     displayShortcuts: true,
     displayTabBrowser: 'disabled',
     displayTrackers: false,
@@ -14,6 +15,7 @@ export const default_settings = {
     themeAnimationSpeed: 0.3,
     themeWallpaperDimness: 0,
     themeBlur: false,
+    themeSidebarBtnOnHover: false,
     displayExpandedSettings: false,
     labelPosition: 'top',
     labelFontSize: 48,
@@ -26,6 +28,7 @@ export const default_settings = {
     shortcutScaleHover: false,
     shortcutMenusHidden: false,
     trackerMaxLimit: 50,
+    searchProvider: 'google',
     userName: ''
 };
 

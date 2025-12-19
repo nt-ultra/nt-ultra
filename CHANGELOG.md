@@ -6,8 +6,22 @@
 - modal management can probably be handled differently (html seems cluttered) (TOP PRIORITY)
 - sidebar footer section: need help, version indicator, possibly full import/export handling ^, reset everything moved here (partically done)
 - need help module: view the documentation option, generate error log option, post an issue option.
+- trackers context menu should  be able to copy link (symmetry with shortcut context menu)
+- trackers meta should ideally stick/flex to the bottom of the card
+- implement tracker dragdrop re-ordering (can honestly reuse shortcuts dragdrop)
+- implement pinning the trackers sidebar (state)
+- trackers sidebar svg that more closely resembles the ui (done)
+- cycle wallpapers buttons < > similar to tablis. (if so possibly a day night cycle selection as well.. but i'd need to figure out placement)
+- search bar, using... not omnibox, some form open search query + suggestion (done)
 
 # Version History
+
+### <ins>NT Ultra 0.7-beta</ins>
+
+- Trackers Sidebar button more accurately represents the UI
+- Context menu options for turning links and tabs into shortcuts (outside of the extension)
+- New Display option to hide sidebar buttons off hover
+- New Searchbar feature with optional providers, enabled in Display Settings
 
 ### <ins>NT Ultra 0.6-beta</ins>
 
