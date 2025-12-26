@@ -26,6 +26,10 @@
 - New searchbar providers: startpage, reddit, wikipedia, youtube
 - Context Menus now dodge screen edges
 
+https://youtu.be/GJM8STOQPOg
+
+<!-- https://www.youtube.com/embed/GJM8STOQPOg?si=_bDPV-mAvKzXhyHp -->
+
 ### <ins>NT Ultra 0.7-beta</ins>
 
 - Trackers Sidebar button more accurately represents the UI
