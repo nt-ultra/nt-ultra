@@ -4,7 +4,7 @@
 }
 
 .header[label-position="top-left"] {
-    position: absolute;
+    position: fixed;
     top: 22px;
     left: 22px;
 }
@@ -15,7 +15,7 @@ body:has(#tabs-btn[style="display: flex;"]) {
 }
 
 .header[label-position="top-right"] {
-    position: absolute;
+    position: fixed;
     top: 22px;
     right: 68px;
 }

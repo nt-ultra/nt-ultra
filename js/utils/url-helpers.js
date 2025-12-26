@@ -33,7 +33,12 @@ export function getFaviconUrl(url) {
 
 export function normalizeUrl(url) {
     url = url.trim();
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    if (
+        !url.startsWith('http://') && 
+        !url.startsWith('https://') && 
+        !url.startsWith('about:') && 
+        !url.startsWith('chrome://')
+    ) {
         url = 'https://' + url;
     }
     try {

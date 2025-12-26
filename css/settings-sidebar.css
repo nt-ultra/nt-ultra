@@ -142,6 +142,7 @@
     border-radius: 6px;
     color: var(--element-fg-color);
     font-size: 14px;
+    font-family: inherit;
     margin-bottom: 12px;
 }
 
@@ -231,25 +232,27 @@
     }
 }
 
-body:has(.tabs-item.dragging) {
-    #shortcuts-grid {
-        outline: 4px dashed var(--accent-color);
-        border-radius: 18px;
-        outline-offset: 20px;
-        animation: outline-glow 1s infinite alternate;
-    }
-}
-
-
-@keyframes outline-glow {
-  from {
-    outline-color: color-mix(in srgb, var(--accent-color) 10%, transparent);
-  }
-  to {
-    outline-color: color-mix(in srgb, var(--accent-color) 80%, transparent);
-  }
-}
 
 #database-section .btn {
     margin-bottom: 4px;
+}
+
+.settings-sidebar {
+    textarea {
+        resize: vertical;
+        font-family: inherit;
+    }
+}
+
+#theme-CSS-expanded-view-btn::after {
+    content:"+";
+    height: 12px; width: 12px;
+    font-size: 12px;
+    margin-inline: 5px;
+    padding: 2px 5px;
+    background: var(--element-layered-bg-color);
+    border: 1px solid color-mix(in srgb, var(--element-layered-bg-color) 95%, white);
+    border-radius: 50%;
+    color: var(--element-fg-color);
+    cursor: pointer;
 }

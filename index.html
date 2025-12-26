@@ -15,6 +15,7 @@
             <h1 id="content-label">New Tab Ultra</h1>
         </div>
 
+        <!-- -->
         <div class="search-container" style="display: none;">
             <div class="searchbar">
                 <input placeholder="Search the web">
@@ -116,9 +117,8 @@
                     </select>
                     <label class="label">Tab Browser</label>
                     <select id="display-tab-browser" class="input">
-                        <option value="disabled">Disabled</option>
-                        <option value="button">Button</option>
-                        <option value="autohide">Autohide</option>
+                        <option value="on">On</option>
+                        <option value="off">Off</option>
                     </select>
                     <label class="label">Trackers</label>
                     <select id="display-trackers" class="input">
@@ -144,7 +144,10 @@
                         <input type="text" id="theme-fg-color" class="input" placeholder="Leave empty to use default">
 
                         <label class="label">Accent Color</label>
-                        <input type="text" id="theme-accent-color" class="input" placeholder="Leave empty to use default">
+                        <input wrap type="text" id="theme-accent-color" class="input" placeholder="Leave empty to use default">
+                    
+                        <label class="label" id="theme-CSS-expanded-view-btn">Custom CSS</label>
+                        <textarea maxlength="" id="theme-CSS" class="input" placeholder="Leave empty to use default"></textarea> 
 
                         <label class="label">Border Radius: <span id="theme-border-radius-value">10</span>px</label>
                         <input type="range" id="theme-border-radius" class="slider" min="0" max="30" value="10">
@@ -174,7 +177,7 @@
                     </div>
                     <div id="display-expanded-theme-settings" class="style-controls-state">
                         <button id="theme-controls-remove-btn" class="style-controls-remove-btn">Delete Theme</button>
-                        <button id="theme-controls-add-btn" class="style-controls-add-btn">Create Theme</button>
+                        <button id="theme-controls-add-btn" class="style-controls-add-btn">Save New Theme</button>
                         <button id="theme-controls-toggle-btn" class="style-controls-toggle-btn">Expand</button>
                     </div>
                 </div>
@@ -262,10 +265,13 @@
         </div>
 
         <!-- Tabs Sidebar -->
-        <div id="tabs-sidebar" class="tabs-sidebar">
+        <div id="tabs-sidebar" class="tabs-sidebar" mode="tabs">
             <div class="tabs-content">
                 <div class="tabs-header">
-                    <h2>Open Tabs (<span id="tabs-count">0</span>)</h2>
+                    <div class="tabs-content-headers">
+                        <h2 id="tabs-content-header-tabs" selected>Tabs</h2>
+                        <h2 id="tabs-content-header-groups">Groups</h2>
+                    </div>
                     <div class="tabs-header-actions">
                         <button id="close-tabs-sidebar" class="close-btn">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -275,6 +281,8 @@
                         </button>
                     </div>
                 </div>
+                <label class="label" id="tabs-content-tabs-count">You have (<span id="tabs-count">0</span>) open tabs, spanning between multiple windows.</label>
+                <label class="label" id="tabs-content-groups-count" hidden>You have (<span id="groups-count">0</span>) tab groups in total. And (<span id="closed-groups-count">0</span>) of them are closed.</label>                
                 
                 <div id="tabs-list" class="tabs-list"></div>
             </div>

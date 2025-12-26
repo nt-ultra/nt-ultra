@@ -14,7 +14,7 @@
 
 ## Overview
 
-Inspired by Firefox's Home Page, New Tab Ultra gives you quick access to more of your favorite websites, more nav focused design, more customization, more choices, less clutter. NT Ultra is also pretty private! No tracking. Can run locally! Data stored locally. Synced data excludes Wallpapers. No other dependencies, besides Internet to take you to your next destination.
+Inspired by Firefox's Home Page, New Tab Ultra gives you quick access to more of your favorite websites, more nav focused design, more customization, more choices, less clutter. NT Ultra is also pretty private! No tracking. Can run locally! Data stored locally. <!--(i may just keep profile sync compeltely excluded)Synced data excludes Wallpapers.--> No other dependencies, besides Internet to take you to your next destination.
 
 See the [Docs](https://nt-ultra.github.io) for help on getting started. If you still can't find what you're looking for, feel free to open an [issue](https://github.com/NT-Ultra/nt-ultra/issues).
 

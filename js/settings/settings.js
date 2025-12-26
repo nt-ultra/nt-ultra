@@ -6,13 +6,14 @@ export function renderSettings() {
     document.getElementById('display-label').value = state.settings.displayLabel ? 'on' : 'off';
     document.getElementById('display-searchbar').value = state.settings.displaySearchbar ? 'on' : 'off';
     document.getElementById('display-shortcuts').value = state.settings.displayShortcuts ? 'on' : 'off';
-    document.getElementById('display-tab-browser').value = state.settings.displayTabBrowser;
+    document.getElementById('display-tab-browser').value = state.settings.displayTabBrowser ? 'on' : 'off';
     document.getElementById('display-trackers').value = state.settings.displayTrackers ? 'on' : 'off';
     document.getElementById('display-notifications').value = state.settings.displayNotifications;
     const themeControls = document.getElementById('theme-controls');
     themeControls.style.display = state.settings.displayExpandedSettings ? 'block' : 'none';
     document.getElementById('theme-controls-toggle-btn').textContent = 
         state.settings.displayExpandedSettings ? 'Collapse' : 'Expand';
+    document.getElementById('theme-CSS').value = state.settings.themeCSS;
     document.getElementById('theme-bg-color').value = state.settings.themeBgColor;
     document.getElementById('theme-fg-color').value = state.settings.themeFgColor;
     document.getElementById('theme-accent-color').value = state.settings.themeAccentColor;
@@ -74,9 +75,11 @@ export function applyStyles() {
     const tabsSidebar = document.getElementById('tabs-sidebar');
     const tabsBtn = document.getElementById('tabs-btn');
     body.style.fontFamily = state.settings.fontFamily;
+    const tCSS = state.settings.themeCSS || '';
     const bgColor = state.settings.themeBgColor || '#2b2a33';
     const fgColor = state.settings.themeFgColor || '#ffffff';
     const accentColor = state.settings.themeAccentColor || '#3b82f6';
+ 
     
     let styleTag = document.getElementById('custom-theme-styles');
     if (!styleTag) {
@@ -91,6 +94,7 @@ export function applyStyles() {
             --accent-color: ${accentColor} !important;
             --element-border-radius: ${state.settings.themeBorderRadius}px !important;
         }
+        * { ${state.settings.themeCSS} }
     `;
     
     const animSpeed = state.settings.themeAnimationSpeed;
@@ -103,23 +107,15 @@ export function applyStyles() {
     body.toggleAttribute('theme-sidebar-btns-on-hover', state.settings.themeSidebarBtnOnHover);
     
     if (tabsSidebar && tabsBtn) {
-        window.tabsSidebarMode = state.settings.displayTabBrowser;
-        switch (state.settings.displayTabBrowser) {
-            case 'disabled':
-                tabsSidebar.style.display = 'none';
-                tabsBtn.style.display = 'none';
-                break;
-            case 'button':
-                tabsSidebar.style.display = 'block';
-                tabsBtn.style.display = 'flex';
-                break;
-            case 'autohide':
-                tabsSidebar.style.display = 'block';
-                tabsBtn.style.display = 'none';
-                break;
+        if (state.settings.displayTabBrowser) {
+            tabsSidebar.style.display = 'block';
+            tabsBtn.style.display = 'flex';
+        } else {
+            tabsSidebar.style.display = 'none';
+            tabsBtn.style.display = 'none';
         }
     }
-
+    
     if (headerText) {
         headerText.style.fontSize = `${state.settings.labelFontSize}px`;
     }

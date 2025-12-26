@@ -35,7 +35,7 @@ export function initShortcutsUI() {
             if (!shortcut) return;
             ContextMenuManager.show(e, shortcut, [
                 { action: 'pin', label: shortcut.pinned ? 'Unpin' : 'Pin', handler: () => togglePin(shortcutId) },
-                { action: 'copy', label: 'Copy Link', handler: () => navigator.clipboard.writeText(shortcut.url) },
+                { action: 'copy', label: 'Copy Link', handler: () => {navigator.clipboard.writeText(shortcut.url); notify('Link Copied to Clipboard', `${shortcut.url}`);}},
                 { action: 'open', label: 'Open in New Tab', handler: () => window.open(shortcut.url, '_blank') },
                 { action: 'edit', label: 'Edit', handler: () => editShortcut(shortcut) },
                 { action: 'delete', label: 'Delete', danger: true, handler: () => deleteShortcut(shortcutId) }

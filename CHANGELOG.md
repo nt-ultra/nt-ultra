@@ -4,17 +4,27 @@
 
 - folders and folder placements, not handled within the shortcut grid.
 - modal management can probably be handled differently (html seems cluttered) (TOP PRIORITY)
-- sidebar footer section: need help, version indicator, possibly full import/export handling ^, reset everything moved here (partically done)
-- need help module: view the documentation option, generate error log option, post an issue option.
+- sidebar footer section: need help, version indicator, possibly full import/export handling, reset everything moved here (partically done)
 - trackers context menu should  be able to copy link (symmetry with shortcut context menu)
-- trackers meta should ideally stick/flex to the bottom of the card
+- trackers meta should ideally stick/flex to the bottom of the card (done)
 - implement tracker dragdrop re-ordering (can honestly reuse shortcuts dragdrop)
-- implement pinning the trackers sidebar (state)
 - trackers sidebar svg that more closely resembles the ui (done)
 - cycle wallpapers buttons < > similar to tablis. (if so possibly a day night cycle selection as well.. but i'd need to figure out placement)
-- search bar, using... not omnibox, some form open search query + suggestion (done)
+- revisit focus stealing prevention, searchbar L 143
+- aria labels: tabs, shortcuts, buttons, trackers, 
 
 # Version History
+
+### <ins>NT Ultra 0.8-beta</ins>
+
+- New Setting for Custom CSS that follows active theme, in Expanded Display Section
+- Tabs Browser now has extended tab management and tab groups
+- Tabs can now be moved between windows or tab groups via dragdrop
+- Tabs now have a dedicated context menu, basic options for reload, pin, sleep, close, etc.
+- Tab Sections also have a dedicated context menu, right click to close all in a window, or put a whole group to sleep, etc.
+- Correction to Label Top positionings and grid
+- New searchbar providers: startpage, reddit, wikipedia, youtube
+- Context Menus now dodge screen edges
 
 ### <ins>NT Ultra 0.7-beta</ins>
 
@@ -23,6 +33,8 @@
 - Context menu options for turning links and tabs into shortcuts (outside of the extension)
 - New Display option to hide sidebar buttons off hover
 - New Searchbar feature with optional providers, enabled in Display Settings
+
+![Vid_20251218_220526-ezgif com-resize](https://github.com/user-attachments/assets/c619020c-b3ff-477c-82ff-6624675c27ab)
 
 ### <ins>NT Ultra 0.6-beta</ins>
 
@@ -49,6 +61,8 @@
 - Max Shortcut limit has been increased from 84 to 168
 - Shortcut scale on hover style adjustments
 - Adjustments to Blur Enabled UI
+
+https://github.com/user-attachments/assets/28898a9d-e34a-455b-9ce5-32e9cf914bc6
 
 ### <ins>NT Ultra 0.2.2-beta</ins>
 

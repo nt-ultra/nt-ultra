@@ -34,7 +34,7 @@ body[theme-blur] {
         backdrop-filter: blur(10px) !important;
     }
     
-    .tabs-item:not(.active),
+    .tabs-item:not(.active,[tab-group-color]),
     .tracker-item
     {
         background: var(--more-blur) !important;

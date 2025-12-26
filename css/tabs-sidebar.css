@@ -63,17 +63,32 @@
     padding: 24px;
     .tabs-header {
         display: flex;
-        justify-content: space-between;
+        /* justify-content: space-between; */
         align-items: center;
         margin-bottom: 24px;
     }
-    .tabs-header h2 {
-        font-size: 20px;
-        font-weight: bold;
+    .tabs-content-headers {
+        display: flex;
+        gap: 8px;
+        & h2 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 8px;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            &:not([selected]) {
+                opacity: 0.1;
+                &:hover {
+                    color: var(--accent-color);
+                    opacity: 1;
+                }
+            }
+        }
     }
     .tabs-header-actions {
         display: flex;
         gap: 8px;
+        margin-left: auto;
     }
     .close-btn {
         background: none;
@@ -93,25 +108,35 @@
     }
 }
 
+.tabs-sidebar[mode="tabs"] #tabs-content-tabs-count { display: block; }
+.tabs-sidebar[mode="tabs"] #tabs-content-groups-count { display: none; }
+.tabs-sidebar[mode="groups"] #tabs-content-tabs-count { display: none; }
+.tabs-sidebar[mode="groups"] #tabs-content-groups-count { display: block; }
+
 .tabs-list {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    margin-top: 24px;
 }
-.tabs-window-header, .tabs-section-header {
+.tabs-window-header, .tabs-section-header, .tabs-group-header {
     font-size: 12px;
     font-weight: 600;
     color: color-mix(in srgb, var(--element-fg-color) 60%, transparent);
-    padding: 8px 12px;
+    padding: 18px 14px;
     margin-top: 12px;
     cursor: pointer;
     user-select: none;
     transition: color 0.2s;
+    display: flex;
     &:hover {
         color: var(--element-fg-color);
     }
     &:first-child {
         margin-top: 0;
+    }
+    & span:last-of-type {
+        margin-left: auto;
     }
 }
 
@@ -119,10 +144,12 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    margin: 6px 2px;
     padding: 10px 12px;
     background: var(--element-layered-bg-color);
     border: 1px solid color-mix(in srgb, var(--element-layered-bg-color) 95%, white);
     border-radius: calc(var(--element-border-radius) - 2px);
+    text-shadow: var(--text-shadow);
     cursor: pointer;
     transition: all 0.2s;
     position: relative;
@@ -234,3 +261,55 @@
 .shortcuts-container {
     transition: background-color 0.2s;
 }
+
+
+
+
+
+
+
+.tabs-group-header[tab-group-color="grey"] {color: #505050 !important;}
+.tabs-item[tab-group-color="grey"] {background: color-mix(in srgb, #50545e 30%, transparent) !important;}
+
+.tabs-group-header[tab-group-color="blue"] {color: #5486c7 !important;}
+.tabs-item[tab-group-color="blue"] {background: color-mix(in srgb, #487fe8 40%, transparent) !important;}
+
+.tabs-group-header[tab-group-color="red"] {color: #e43d3d !important;}
+.tabs-item[tab-group-color="red"] {background: color-mix(in srgb, #fb3838 70%, transparent) !important;}
+
+.tabs-group-header[tab-group-color="yellow"] {color: #ddd55c !important;}
+.tabs-item[tab-group-color="yellow"] {background: color-mix(in srgb, #fff344 70%, transparent) !important;}
+
+.tabs-group-header[tab-group-color="green"] {color: #3c9b58 !important;}
+.tabs-item[tab-group-color="green"] {background: color-mix(in srgb, #3c9b58 30%, transparent) !important;}
+
+.tabs-group-header[tab-group-color="pink"] {color: #e060cb !important;}
+.tabs-item[tab-group-color="pink"] {background: color-mix(in srgb, #e060cb 30%, transparent) !important;}
+
+.tabs-group-header[tab-group-color="purple"] {color: #8e50c4 !important;}
+.tabs-item[tab-group-color="purple"] {background: color-mix(in srgb, #9f47ec 50%, transparent) !important;}
+
+.tabs-group-header[tab-group-color="cyan"] {color: #55c1ec !important;}
+.tabs-item[tab-group-color="cyan"] {background: color-mix(in srgb, #55c1ec 30%, transparent) !important;}
+
+.tabs-group-header[tab-group-color="orange"] {color: #cf8747 !important;}
+.tabs-item[tab-group-color="orange"] {background: color-mix(in srgb, #cf8747 50%, transparent) !important;}
+
+.tabs-item[tab-group-color] {
+    text-shadow: var(--text-shadow); /* maybe + 0.2 color */
+    border: 1px solid rgba(50,50,50,0.2);
+}
+
+body:has(.tabs-item.dragging) {
+    .tabs-window-container:not(:has(.tabs-item.dragging)),
+    .tabs-section-container:not(:has(.tabs-item.dragging)),
+    .tabs-group-container:not(:has(.tabs-item.dragging))
+    {
+        border-radius: 8px;
+        outline: 1px var(--accent-color) dashed;
+        animation: outline-glow 1.1s infinite alternate;
+    }
+}
+
+
+

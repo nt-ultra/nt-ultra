@@ -70,6 +70,11 @@ export function renderShortcuts() {
         
         icon.addEventListener('click', (e) => {
             if (isDragging()) return;
+            if (shortcut.url.startsWith('about:') || shortcut.url.startsWith('chrome://')) {
+                browser.tabs.create({ url: shortcut.url });
+                notify('Extension Access Denied','Extensions cannot access these sort of links due to api security')
+                return;
+            }
             if (e.button === 1 || e.ctrlKey || e.metaKey) {
                 window.open(shortcut.url, '_blank');
             } else {

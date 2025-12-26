@@ -60,12 +60,7 @@ export function initSettingsUI() {
         updateSetting('displayShortcuts', e.target.value === 'on');
     });
     document.getElementById('display-tab-browser').addEventListener('change', (e) => {
-        const newMode = e.target.value;
-        updateSetting('displayTabBrowser', newMode);
-        window.tabsSidebarMode = newMode;
-        if (window.updateTriggerVisibility) {
-            window.updateTriggerVisibility(newMode);
-        }
+        updateSetting('displayTabBrowser', e.target.value === 'on');
     });
     document.getElementById('display-trackers').addEventListener('change', (e) => {
         updateSetting('displayTrackers', e.target.value === 'on');
@@ -133,7 +128,12 @@ export function initSettingsUI() {
             updateSetting('themeAccentColor', e.target.value.trim());
         }, 500);
     });
-
+    document.getElementById('theme-CSS').addEventListener('input', (e) => {
+        clearTimeout(colorDebounceTimer);
+        colorDebounceTimer = setTimeout(() => {
+            updateSetting('themeCSS', e.target.value.trim());
+        }, 700);
+    });
     // should remain these id's
     document.getElementById('theme-controls-toggle-btn').addEventListener('click', (e) => {
         e.preventDefault();

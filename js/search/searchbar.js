@@ -8,12 +8,7 @@ const SEARCH_PROVIDERS = {
         searchUrl: 'https://www.google.com/search?q=',
         parseResponse: (data) => data[1] || []
     },
-    duckduckgo: {
-        name: 'DuckDuckGo',
-        suggestionsUrl: 'https://duckduckgo.com/ac/?q=',
-        searchUrl: 'https://duckduckgo.com/?q=',
-        parseResponse: (data) => data.map(item => item.phrase)
-    },
+
     bing: {
         name: 'Bing',
         suggestionsUrl: 'https://api.bing.com/osjson.aspx?query=',
@@ -32,11 +27,43 @@ const SEARCH_PROVIDERS = {
             }
         }
     },
-    ecosia: {
-        name: 'Ecosia',
-        suggestionsUrl: 'https://ac.ecosia.org/autocomplete?q=',
-        searchUrl: 'https://www.ecosia.org/search?q=',
-        parseResponse: (data) => data.suggestions || []
+    duckduckgo: {
+        name: 'DuckDuckGo',
+        suggestionsUrl: 'https://duckduckgo.com/ac/?q=',
+        searchUrl: 'https://duckduckgo.com/?q=',
+        parseResponse: (data) => data.map(item => item.phrase)
+    },
+    // ecosia: {
+    //     name: 'Ecosia',
+    //     suggestionsUrl: 'https://ac.ecosia.org/autocomplete?q=',
+    //     searchUrl: 'https://www.ecosia.org/search?q=',
+    //     parseResponse: (data) => data.suggestions || []
+    // },
+    startpage: {
+        name: 'Startpage',
+        suggestionsUrl: 'https://www.google.com/complete/search?client=firefox&q=',
+        searchUrl: 'https://www.startpage.com/do/search?q=',
+        parseResponse: (data) => data[1] || []
+    },
+    reddit: {
+        name: 'Reddit',
+        suggestionsUrl: 'https://www.google.com/complete/search?client=firefox&q=',
+        searchUrl: 'https://www.google.com/search?q=',
+        parseResponse: (data) => {
+            return data[1] || [];
+        }
+    },
+    wikipedia: {
+        name: 'Wikipedia',
+        suggestionsUrl: 'https://en.wikipedia.org/w/api.php?action=opensearch&search=',
+        searchUrl: 'https://en.wikipedia.org/wiki/Special:Search?search=',
+        parseResponse: (data) => data[1] || []
+    },
+    youtube: {
+        name: 'YouTube',
+        suggestionsUrl: 'https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=',
+        searchUrl: 'https://www.youtube.com/results?search_query=',
+        parseResponse: (data) => data[1] || []
     }
 };
 let debounceTimer;
@@ -87,10 +114,14 @@ function escapeHtml(text) {
 // search away
 function performSearch(query) {
     const provider = SEARCH_PROVIDERS[state.settings.searchProvider] || SEARCH_PROVIDERS.google;
-    const searchUrl = provider.searchUrl + encodeURIComponent(query);
-    window.location.href = searchUrl;
+    if (state.settings.searchProvider === 'reddit') {
+        const searchQuery = `${query} reddit`;
+        window.location.href = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+    } else {
+        const searchUrl = provider.searchUrl + encodeURIComponent(query);
+        window.location.href = searchUrl;
+    }
 }
-
 // navigation
 function handleKeyboardNavigation(e, searchInput) {
     const suggestionsBox = document.getElementById('search-suggestions');
@@ -136,9 +167,23 @@ export function initSearchbar() {
     const searchInput = document.querySelector('.searchbar input');
     const suggestionsBox = document.getElementById('search-suggestions');
     if (!searchInput || !suggestionsBox) {
-        console.error('Search elements not found');
+        console.error('initSearchbar: Search elements not found');
         return;
     }
+
+    // if (state.settings.displaySearchbar) {
+    //     setTimeout(() => {
+    //         searchInput.focus();
+    //     }, 100);
+        
+    //     // Also focus on any click on the search input
+    //     document.addEventListener('click', (e) => {
+    //         if (e.target === searchInput || searchInput.contains(e.target)) {
+    //             searchInput.focus();
+    //         }
+    //     });
+    // }
+    
     searchInput.addEventListener('input', (e) => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(async () => {
@@ -178,7 +223,11 @@ const PROVIDER_ICONS = {
     duckduckgo: 'https://duckduckgo.com/favicon.ico',
     bing: 'https://www.bing.com/favicon.ico',
     brave: 'https://brave.com/static-assets/images/brave-favicon.png',
-    ecosia: 'https://www.ecosia.org/favicon.ico'
+    ecosia: 'https://www.ecosia.org/favicon.ico',
+    reddit: 'https://www.reddit.com/favicon.ico',
+    startpage: 'https://www.startpage.com/favicon.ico',
+    wikipedia: 'https://en.wikipedia.org/favicon.ico',
+    youtube: 'https://www.youtube.com/favicon.ico'
 };
 let isDropdownOpen = false;
 

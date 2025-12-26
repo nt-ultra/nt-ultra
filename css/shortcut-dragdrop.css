@@ -40,3 +40,22 @@ body.dragging {
 .shortcut-menu-btn {
     pointer-events: auto;
 }
+
+body:has(.tabs-item.dragging) {
+    #shortcuts-grid {
+        outline: 4px dashed var(--accent-color);
+        border-radius: 18px;
+        outline-offset: 20px;
+        animation: outline-glow 1s infinite alternate;
+    }
+}
+
+
+@keyframes outline-glow {
+  from {
+    outline-color: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  }
+  to {
+    outline-color: color-mix(in srgb, var(--accent-color) 80%, transparent);
+  }
+}
